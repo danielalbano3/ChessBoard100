@@ -1,7 +1,5 @@
-let wKingMoved = false
-let bKingMoved = false
-let wRookMoved = false
-let bRookMoved = false
+let bInrookValid = true
+let wInrookValid = true
 const board = document.createElement("div")
 board.classList.add("board")
 document.body.appendChild(board)
@@ -111,9 +109,9 @@ const p6w = setPawn("white", 7, 6)
 const p7w = setPawn("white", 7, 7)
 const p8w = setPawn("white", 7, 8)
 const r1b = setRook("black", 1, 1)
-    const r2b = setRook("black", 1, 8)
+const r2b = setRook("black", 1, 8)
 const r1w = setRook("white", 8, 1)
-    const r2w = setRook("white", 8, 8)
+const r2w = setRook("white", 8, 8)
 const k1b = setKnight("black", 1, 2)
 const k2b = setKnight("black", 1, 7)
 const k1w = setKnight("white", 8, 2)
@@ -124,8 +122,8 @@ const b1w = setBishop("white", 8, 3)
 const b2w = setBishop("white", 8, 6)
 const qb = setQueen("black", 1, 4)
 const qw = setQueen("white", 8, 4)
-    const kb = setKing("black", 1, 5)
-    const kw = setKing("white", 8, 5)
+const kb = setKing("black", 1, 5)
+const kw = setKing("white", 8, 5)
 // const blackPieces = [
 //   p1b,p2b,p3b,p4b,p5b,p6b,p7b,p8b,
 //   r1b,k1b,b1b,qb,kb,b2b,k2b,r2b
@@ -137,39 +135,7 @@ function switchTurn() {
   turn == "white" ? (turn = "black") : (turn = "white")
   turnLabel.innerText = `Turn: ${turn}`
 }
-function playControls(){
-  if (turn == 'black') return
-    if (selectedPiece.length == 0){
-      if (space.firstChild == null){
-        return
-      } else {
-        if (space.firstChild.dataset.color == turn){
-          selectedPiece.push(space.firstChild)
-          showMoves(space)
-        } else if (space.firstChild.dataset.color !== turn){
-          return
-        }
-      }
-    } else {
-      if (validMoves.includes(space)){
-        movePiece(space)
-        runAI()
-        resetSelect()
-      } else {
-        if (space.firstChild == null){
-          return
-        } else {
-          if (space.firstChild.dataset.color == turn){
-            resetSelect()
-            selectedPiece.push(space.firstChild)
-            showMoves(space)
-          } else {
-            return
-          }
-        }
-      }
-    }
-}
+
 spaces.forEach(space => {
   space.addEventListener('click', () => {
     // if (turn == 'black') return
@@ -205,16 +171,25 @@ spaces.forEach(space => {
     }
   })
 })
-// function runAI(){
-//   return
-// }
+
 function movePiece(space) {
+  const piece = selectedPiece[0]
   if (space.firstChild != null){
     space.removeChild(space.firstChild)
   }
-  space.appendChild(selectedPiece[0])
+
+  if (piece.dataset.piece == 'king'){
+    if(turn == 'black' && bInrookValid && findSpace(1,7)) {
+      findSpace(1,6).appendChild(r2b)
+    } else if (turn == 'white' && wInrookValid && space == findSpace(8,7)){
+      findSpace(8,6).appendChild(r2w)
+    }
+  }
+
+  space.appendChild(piece)
   switchTurn()
 }
+
 function resetSelect() {
   selectedPiece.length = 0
   validMoves.length = 0
@@ -223,6 +198,7 @@ function resetSelect() {
     item.classList.remove("valid")
   })
 }
+
 function highlightValidMoves() {
   selectedPiece[0].closest('.space').classList.add('active')
   if (validMoves.length == 0) return
@@ -231,6 +207,7 @@ function highlightValidMoves() {
     space.classList.add('valid')
   })
 }
+
 function showMoves(space){
   const piece = selectedPiece[0]
   const row = space.dataset.row
@@ -261,6 +238,7 @@ function showMoves(space){
   }
   highlightValidMoves()
 }
+
 function pawnMoves(color,row,col){
   const delta = allMoves[0]
   let i
@@ -308,6 +286,7 @@ function pawnMoves(color,row,col){
   }
 
 }
+
 function rookMoves(row,col){
   const delta = allMoves[1]
   //up 
@@ -392,6 +371,7 @@ function rookMoves(row,col){
   }
   
 }
+
 function bishopMoves(row,col){
   const delta = allMoves[2]
   for (let i = 0; i < 7; i++){
@@ -486,16 +466,29 @@ function kingMoves(row,col){
         if (kSpace.firstChild.dataset.color != turn) validMoves.push(kSpace)
       }
     }
-
   }
+
+  checkInRook()
+}
+
+function checkInRook(){
+  if (!inRookMoveClear() || !inRookSpaceClear()) return
+  let kingIR
+  if (turn == 'white'){
+    kingIR = findSpace(8,7)
+  } else {
+    kingIR = findSpace(1,7)
+  }
+  validMoves.push(kingIR)
 }
 
 function inRookSpaceClear(){
   if (selectedPiece[0] == null) return
   if (selectedPiece[0].dataset.piece !== 'king') return
   const king = selectedPiece[0]
-  const kRow = parseInt(king.dataset.row)
-  const kCol = parseInt(king.dataset.col)
+  const kingSpace = king.closest('.space')
+  const kRow = parseInt(kingSpace.dataset.row)
+  const kCol = parseInt(kingSpace.dataset.col)
   
   const bishopSpace = findSpace(kRow,kCol + 1)
   const knightSpace = findSpace(kRow,kCol + 2)
@@ -504,11 +497,16 @@ function inRookSpaceClear(){
   return spaceFree
 }
 
-function hasKingMoved(){
-  let kRow
-  const kCol = 5
-  turn == 'white' ? kRow = 8 : kRow = 1
-  
+function inRookMoveClear(){
+  let result
+  const bKingSpace = findSpace(1,5).firstChild
+  const bRookSpace = findSpace(1,8).firstChild
+  const wKingSpace = findSpace(8,5).firstChild
+  const wRookSpace = findSpace(8,8).firstChild
+  if (bKingSpace == null || bRookSpace == null) bInrookValid = false
+  if (wKingSpace == null || wRookSpace == null) wInrookValid = false
+  turn == 'white' ? result = wInrookValid : result = bInrookValid
+  return result
 }
 
 function queenMoves(row,col){
