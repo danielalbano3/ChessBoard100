@@ -1,3 +1,7 @@
+let wKingMoved = false
+let bKingMoved = false
+let wRookMoved = false
+let bRookMoved = false
 const board = document.createElement("div")
 board.classList.add("board")
 document.body.appendChild(board)
@@ -107,9 +111,9 @@ const p6w = setPawn("white", 7, 6)
 const p7w = setPawn("white", 7, 7)
 const p8w = setPawn("white", 7, 8)
 const r1b = setRook("black", 1, 1)
-const r2b = setRook("black", 1, 8)
+    const r2b = setRook("black", 1, 8)
 const r1w = setRook("white", 8, 1)
-const r2w = setRook("white", 8, 8)
+    const r2w = setRook("white", 8, 8)
 const k1b = setKnight("black", 1, 2)
 const k2b = setKnight("black", 1, 7)
 const k1w = setKnight("white", 8, 2)
@@ -120,8 +124,8 @@ const b1w = setBishop("white", 8, 3)
 const b2w = setBishop("white", 8, 6)
 const qb = setQueen("black", 1, 4)
 const qw = setQueen("white", 8, 4)
-const kb = setKing("black", 1, 5)
-const kw = setKing("white", 8, 5)
+    const kb = setKing("black", 1, 5)
+    const kw = setKing("white", 8, 5)
 // const blackPieces = [
 //   p1b,p2b,p3b,p4b,p5b,p6b,p7b,p8b,
 //   r1b,k1b,b1b,qb,kb,b2b,k2b,r2b
@@ -467,6 +471,7 @@ function bishopMoves(row,col){
     }
   }
 }
+
 function kingMoves(row,col){
   const delta = allMoves[3]
   for (i = 0; i < delta.length - 1; i++){
@@ -484,6 +489,28 @@ function kingMoves(row,col){
 
   }
 }
+
+function inRookSpaceClear(){
+  if (selectedPiece[0] == null) return
+  if (selectedPiece[0].dataset.piece !== 'king') return
+  const king = selectedPiece[0]
+  const kRow = parseInt(king.dataset.row)
+  const kCol = parseInt(king.dataset.col)
+  
+  const bishopSpace = findSpace(kRow,kCol + 1)
+  const knightSpace = findSpace(kRow,kCol + 2)
+
+  const spaceFree = bishopSpace.firstChild == null && knightSpace.firstChild == null
+  return spaceFree
+}
+
+function hasKingMoved(){
+  let kRow
+  const kCol = 5
+  turn == 'white' ? kRow = 8 : kRow = 1
+  
+}
+
 function queenMoves(row,col){
   rookMoves(row,col)
   bishopMoves(row,col)
