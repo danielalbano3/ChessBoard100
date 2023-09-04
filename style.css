@@ -266,3 +266,7 @@ button:hover{
 [data-promotion].show{
   visibility: visible;
 }
+
+.piece:hover{
+  transform:translateY(-5px)
+}
