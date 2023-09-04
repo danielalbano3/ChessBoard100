@@ -198,7 +198,7 @@ function movePiece(space) {
   }
 
   if (piece.dataset.piece == 'king'){
-    if(turn == 'black' && bInrookValid && findSpace(1,7)) {
+    if(turn == 'black' && bInrookValid && space == findSpace(1,7)) {
       findSpace(1,6).appendChild(r2b)
     } else if (turn == 'white' && wInrookValid && space == findSpace(8,7)){
       findSpace(8,6).appendChild(r2w)
