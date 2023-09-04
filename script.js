@@ -1,8 +1,25 @@
-let bInrookValid = true
-let wInrookValid = true
 const board = document.createElement("div")
+const promo = document.querySelector('[data-promotion]')
+const btns = document.querySelectorAll('button')
+let promoOff = true
+let spaceForPromo
+let promoTurn
+
+let promotionSelected = null
+
+btns.forEach(button => {
+  button.addEventListener('click', () => {
+    promotionSelected = button.innerText
+    promo.classList.remove('show')   
+    pawnPromotionPopup(promotionSelected)
+  })
+})
+
 board.classList.add("board")
 document.body.appendChild(board)
+
+let bInrookValid = true
+let wInrookValid = true
 for (let i = 0; i < 8; i++) {
   for (let j = 0; j < 8; j++) {
     const space = document.createElement("div")
@@ -139,32 +156,34 @@ function switchTurn() {
 spaces.forEach(space => {
   space.addEventListener('click', () => {
     // if (turn == 'black') return
-    if (selectedPiece.length == 0){
-      if (space.firstChild == null){
-        return
-      } else {
-        if (space.firstChild.dataset.color == turn){
-          selectedPiece.push(space.firstChild)
-          showMoves(space)
-        } else if (space.firstChild.dataset.color !== turn){
-          return
-        }
-      }
-    } else {
-      if (validMoves.includes(space)){
-        movePiece(space)
-        // runAI()
-        resetSelect()
-      } else {
+    if (promoOff){
+      if (selectedPiece.length == 0){
         if (space.firstChild == null){
           return
         } else {
           if (space.firstChild.dataset.color == turn){
-            resetSelect()
             selectedPiece.push(space.firstChild)
             showMoves(space)
-          } else {
+          } else if (space.firstChild.dataset.color !== turn){
             return
+          }
+        }
+      } else {
+        if (validMoves.includes(space)){
+          movePiece(space)
+          // runAI()
+          resetSelect()
+        } else {
+          if (space.firstChild == null){
+            return
+          } else {
+            if (space.firstChild.dataset.color == turn){
+              resetSelect()
+              selectedPiece.push(space.firstChild)
+              showMoves(space)
+            } else {
+              return
+            }
           }
         }
       }
@@ -184,9 +203,22 @@ function movePiece(space) {
     } else if (turn == 'white' && wInrookValid && space == findSpace(8,7)){
       findSpace(8,6).appendChild(r2w)
     }
-  }
+  } 
 
   space.appendChild(piece)
+
+  if (piece.dataset.piece == 'pawn'){
+    if (space.dataset.row == 1 || space.dataset.row == 8){
+      spaceForPromo = space
+      promoTurn = turn
+      space.removeChild(piece)
+      const row = parseInt(space.dataset.row)
+      const col = parseInt(space.dataset.col)
+      promoOff = false
+      promo.classList.add('show')
+    }
+  }
+
   switchTurn()
 }
 
@@ -246,7 +278,6 @@ function pawnMoves(color,row,col){
   const pRow = parseInt(row)
   const pCol = parseInt(col)
 
-  //step
   const stepRow = parseInt(delta[i + 0][0])
   const stepCol = parseInt(delta[i + 0][1])
   const step = findSpace(stepRow + pRow, stepCol + pCol)
@@ -254,7 +285,6 @@ function pawnMoves(color,row,col){
     if (step.firstChild == null) validMoves.push(step)
   }
 
-  //jump
   let j
   color == 'black' ? j = 0 : j = 1
   const iJump = parseInt(delta[8][j])
@@ -265,7 +295,6 @@ function pawnMoves(color,row,col){
     if (step.firstChild == null && jump.firstChild == null) validMoves.push(jump)
   }
 
-  //leftAtk
   const leftAtkRow = parseInt(delta[i + 2][0])
   const leftAtkCol = parseInt(delta[i + 2][1])
   const leftAtk = findSpace(leftAtkRow + pRow, leftAtkCol + pCol)
@@ -275,7 +304,6 @@ function pawnMoves(color,row,col){
     }
   }
 
-  //rightAtk
   const rightAtkRow = parseInt(delta[i + 3][0])
   const rightAtkCol = parseInt(delta[i + 3][1])
   const rightAtk = findSpace(rightAtkRow + pRow, rightAtkCol + pCol)
@@ -284,12 +312,11 @@ function pawnMoves(color,row,col){
       if (rightAtk.firstChild.dataset.color != turn) validMoves.push(rightAtk)
     }
   }
-
 }
 
 function rookMoves(row,col){
   const delta = allMoves[1]
-  //up 
+   
   for (let i = 0; i < 7; i++){
     let rRow = parseInt(delta[i][0])
     let rCol = parseInt(delta[i][1])
@@ -309,7 +336,7 @@ function rookMoves(row,col){
       }
     }
   }
-  //down
+  
   for (let i = 7; i < 14; i++){
     let rRow = parseInt(delta[i][0])
     let rCol = parseInt(delta[i][1])
@@ -329,7 +356,7 @@ function rookMoves(row,col){
       }
     }
   }
-  //left 14-21
+  
   for (let i = 14; i < 21; i++){
     let rRow = parseInt(delta[i][0])
     let rCol = parseInt(delta[i][1])
@@ -349,7 +376,7 @@ function rookMoves(row,col){
       }
     }
   }
-  //right 21-28
+  
   for (let i = 21; i < 28; i++){
     let rRow = parseInt(delta[i][0])
     let rCol = parseInt(delta[i][1])
@@ -736,3 +763,35 @@ const title = document.createElement('div')
 title.dataset.title = ''
 title.innerText = 'Chess Board 100'
 document.body.appendChild(title)
+
+function pawnPromotionPopup(promotionSelected){
+  const row = spaceForPromo.dataset.row
+  const col = spaceForPromo.dataset.col
+  switch (promotionSelected){
+    case 'Queen':
+      spaceForPromo.appendChild(setQueen(promoTurn,row,col))
+      break
+    case 'Rook':
+      spaceForPromo.appendChild(setRook(promoTurn,row,col))
+      break
+    case 'Bishop':
+      spaceForPromo.appendChild(setBishop(promoTurn,row,col))
+      break
+    case 'Knight':
+      spaceForPromo.appendChild(setKnight(promoTurn,row,col))
+      break
+    default:
+      return
+  }
+
+  resetPromo()
+  
+}
+
+function resetPromo(){
+  promoOff = true
+  promotionSelected = null
+  spaceForPromo = null
+  promoTurn = null
+  promo.classList.remove('show')
+}

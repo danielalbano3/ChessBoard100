@@ -241,3 +241,28 @@ body {
   border: 3px solid gold;
   padding:5px;
 }
+
+[data-promotion]{
+  z-index: 2;
+  visibility: hidden;
+  position:absolute;
+  height:125px;
+  width:200px;
+  background: yellow;
+  display:flex;
+  flex-direction:column;
+  text-align:center;
+  align-items:center;
+  padding-top:5px;
+  gap:2px;
+}
+
+button {
+  width:80%;
+}
+button:hover{
+  color:orange;
+}
+[data-promotion].show{
+  visibility: visible;
+}
