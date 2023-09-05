@@ -7,6 +7,12 @@ let promoTurn
 
 let promotionSelected = null
 
+let bInrookValid = true
+let wInrookValid = true
+
+let wQIR = true
+let bQIR = true
+
 btns.forEach(button => {
   button.addEventListener('click', () => {
     promotionSelected = button.innerText
@@ -18,8 +24,6 @@ btns.forEach(button => {
 board.classList.add("board")
 document.body.appendChild(board)
 
-let bInrookValid = true
-let wInrookValid = true
 for (let i = 0; i < 8; i++) {
   for (let j = 0; j < 8; j++) {
     const space = document.createElement("div")
@@ -141,10 +145,22 @@ const qb = setQueen("black", 1, 4)
 const qw = setQueen("white", 8, 4)
 const kb = setKing("black", 1, 5)
 const kw = setKing("white", 8, 5)
-// const blackPieces = [
-//   p1b,p2b,p3b,p4b,p5b,p6b,p7b,p8b,
-//   r1b,k1b,b1b,qb,kb,b2b,k2b,r2b
-// ]
+const blackPieces = [
+  p1b,p2b,p3b,p4b,p5b,p6b,p7b,p8b,
+  r1b,k1b,b1b,qb,kb,b2b,k2b,r2b
+]
+const blackPawns = [
+  p1b,p2b,p3b,p4b,p5b,p6b,p7b,p8b
+]
+const whitePieces = [
+  p1w,p2w,p3w,p4w,p5w,p6w,p7w,p8w,
+  r1w,k1w,b1w,qw,kw,b2w,k2w,r2w
+]
+const whitePawns = [
+  p1w,p2w,p3w,p4w,p5w,p6w,p7w,p8w
+]
+
+
 let turn = "white"
 const selectedPiece = []
 const validMoves = []
@@ -202,6 +218,12 @@ function movePiece(space) {
       findSpace(1,6).appendChild(r2b)
     } else if (turn == 'white' && wInrookValid && space == findSpace(8,7)){
       findSpace(8,6).appendChild(r2w)
+    }
+
+    if (turn == 'black' && bQIR && space == findSpace(1,3)){
+      findSpace(1,4).appendChild(r1b)
+    } else if (turn == 'white' && wQIR && space == findSpace(8,3)){
+      findSpace(8,4).appendChild(r1w)
     }
   } 
 
@@ -496,7 +518,50 @@ function kingMoves(row,col){
   }
 
   checkInRook()
+  checkQRook()
 }
+
+function checkQRook(){
+  if (!qRookMoveClear() || !qRookSpaceClear()) return
+  let qIR
+  if (turn == 'white'){
+    qIR = findSpace(8,3)
+  } else {
+    qIR = findSpace(1,3)
+  }
+  validMoves.push(qIR)
+}
+
+
+function qRookMoveClear(){
+  let result
+  const bKingSpace = findSpace(1,5).firstChild
+  const bRookSpace = findSpace(1,1).firstChild
+  const wKingSpace = findSpace(8,5).firstChild
+  const wRookSpace = findSpace(8,1).firstChild
+  if (bKingSpace == null || bRookSpace == null) bQIR = false
+  if (wKingSpace == null || wRookSpace == null) wQIR = false
+  turn == 'white' ? result = wQIR : result = bQIR
+  return result
+}
+
+
+function qRookSpaceClear(){
+  let qclear = false
+  const king = selectedPiece[0]
+  const space = king.closest('.space')
+  const row = parseInt(space.dataset.row)
+  const col = parseInt(space.dataset.col)
+
+  const qspace = findSpace(row,col - 1).firstChild
+  const bspace = findSpace(row,col - 2).firstChild
+  const kspace = findSpace(row,col - 3).firstChild
+
+  if (qspace == null && bspace == null && kspace == null) qclear = true
+  
+  return qclear
+}
+
 
 function checkInRook(){
   if (!inRookMoveClear() || !inRookSpaceClear()) return
