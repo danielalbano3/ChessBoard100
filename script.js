@@ -27,3 +27,55 @@ function switchColor(number) {
   }
   return colorpair
 }
+
+class Pawn{
+  constructor(row,col,color){
+    this.row = row
+    this.col = col
+    this.color = color
+    this.kind = "pawn"
+    this.moves = this.moves(color)
+    this.nowjumped = false
+  }
+
+  moves(color){
+    const allMoves = [
+      [//[0] BLACK
+        {
+          jump: [2,0],
+          forward: [1,0],
+          leftatk: [1,-1],  //enpassant L
+          rightatk: [1,1]   //enpassant R
+        },
+      
+      //[1] WHITE
+        {
+          jump: [-2,0],
+          forward: [-1,0],
+          leftatk: [-1,-1], //enpassant L
+          rightatk: [-1,1]  //enpassant R
+        }
+      ]
+    ]
+
+    let moves
+    if (color === 'white'){
+      moves = allMoves[1]
+    } else {
+      moves = allMoves[0]
+    }
+    
+    return moves
+  }
+
+  jumped() {
+    this.nowjumped = true
+  }
+}
+
+const p1w = new Pawn(7,1,"")
+
+console.log(p1w)
+console.log(p1w.nowjumped)
+p1w.jumped()
+console.log(p1w.nowjumped)
