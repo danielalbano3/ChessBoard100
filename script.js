@@ -4,6 +4,7 @@ const btns = document.querySelectorAll('button')
 let promoOff = true
 let spaceForPromo
 let promoTurn
+let turnCount = 1
 
 let promotionSelected = null
 
@@ -145,21 +146,6 @@ const qb = setQueen("black", 1, 4)
 const qw = setQueen("white", 8, 4)
 const kb = setKing("black", 1, 5)
 const kw = setKing("white", 8, 5)
-const blackPieces = [
-  p1b,p2b,p3b,p4b,p5b,p6b,p7b,p8b,
-  r1b,k1b,b1b,qb,kb,b2b,k2b,r2b
-]
-const blackPawns = [
-  p1b,p2b,p3b,p4b,p5b,p6b,p7b,p8b
-]
-const whitePieces = [
-  p1w,p2w,p3w,p4w,p5w,p6w,p7w,p8w,
-  r1w,k1w,b1w,qw,kw,b2w,k2w,r2w
-]
-const whitePawns = [
-  p1w,p2w,p3w,p4w,p5w,p6w,p7w,p8w
-]
-
 
 let turn = "white"
 const selectedPiece = []
@@ -167,11 +153,12 @@ const validMoves = []
 function switchTurn() {
   turn == "white" ? (turn = "black") : (turn = "white")
   turnLabel.innerText = `Turn: ${turn}`
+  turnCount++
+  console.log(turnCount)
 }
 
 spaces.forEach(space => {
   space.addEventListener('click', () => {
-    // if (turn == 'black') return
     if (promoOff){
       if (selectedPiece.length == 0){
         if (space.firstChild == null){
@@ -334,6 +321,8 @@ function pawnMoves(color,row,col){
       if (rightAtk.firstChild.dataset.color != turn) validMoves.push(rightAtk)
     }
   }
+
+  enPassantCheck()
 }
 
 function rookMoves(row,col){
@@ -859,4 +848,63 @@ function resetPromo(){
   spaceForPromo = null
   promoTurn = null
   promo.classList.remove('show')
+}
+
+
+
+//EN PASSANT UNDER CONSTRUCTION
+
+const mutationObserver = new MutationObserver(list => {
+  // monitorJump(list[0].addedNodes[0])
+  let pieceMoved = list[0].addedNodes[0]
+  if (pieceMoved.dataset.piece !== 'pawn') return
+  console.log(list[0])
+  console.log(list[0].target)
+  console.log(pieceMoved)
+  console.log(`${turnCount}`)
+})
+
+
+const spArr = Array.from(spaces)
+const jumpSpaces = spArr.filter(sp => sp.dataset.row == 5 || sp.dataset.row == 4)
+// const bJumpSpaces = spArr.filter(sp => sp.dataset.row == 4)
+
+jumpSpaces.forEach(jump => {
+  mutationObserver.observe(jump, {childList: true})
+})
+
+function monitorJump(pawn){
+  return
+}
+
+
+
+//on selecting pawn
+function enPassantCheck(){
+  const spacewithpawnsArray = sidePawns()
+}
+
+function sidePawns(){
+  const pawnHere = []
+  const piece = selectedPiece[0]
+  const row = parseInt(piece.dataset.row)
+  const col = parseInt(piece.dataset.col)
+  const leftSpace = findSpace(row,col - 1)
+  const rightSpace = findSpace(row,col + 1)
+
+  if (leftSpace != null){
+    if (leftSpace.firstChild != null){
+      let pieceData = leftSpace.firstChild.dataset
+      if(pieceData.piece == 'pawn' && pieceData.color != turn) pawnHere.push(leftSpace)
+    }
+  }
+
+  if (rightSpace != null){
+    if (rightSpace.firstChild != null){
+      let pieceData = rightSpace.firstChild.dataset
+      if(pieceData.piece == 'pawn' && pieceData.color != turn) pawnHere.push(rightSpace)
+    }
+  }
+
+  return pawnHere
 }
