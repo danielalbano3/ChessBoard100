@@ -42,8 +42,9 @@ body {
 }
 
 .piece {
-  height: 50%;
-  width: 50%;
+  --size: 75%;
+  height: var(--size);
+  width: var(--size);
 }
 
 [data-piece = pawn] {

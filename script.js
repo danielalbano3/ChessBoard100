@@ -41,7 +41,6 @@ class Pawn{
     this.col = col
     this.color = color
     this.kind = "pawn"
-    this.moves = this.allmoves()
     this.nowjumped = false
     this.piece = this.render()
     this.moveTo(row,col)
@@ -66,32 +65,18 @@ class Pawn{
     return moves
   }
 
-  showMoves(){
-    const moves = this.moves
-
-    const forward = moves.forward
-    const forwardcell = cells.find(cell => 
-      cell.row == forward[0] + this.row && cell.col == forward[1] + this.col)
-
-    const jump = moves.jump
-    const jumpcell = cells.find(cell => 
-      cell.row == jump[0] + this.row && cell.col == jump[1] + this.col)
-
-    const leftatk = moves.leftatk
-    const leftatkcell = cells.find(cell =>
-      cell.row == leftatk[0] + this.row && cell.col == leftatk[1] + this.col)
-
-    const rightatk = moves.rightatk
-    const rightatkcell = cells.find(cell =>
-      cell.row == rightatk[0] + this.row && cell.col == rightatk[1] + this.col)
-    
-    return {
-      step: forwardcell,
-      hop: jumpcell,
-      L: leftatkcell,
-      R: rightatkcell
-    }
+  forward(){
+    const moves = this.allmoves()
+    const newRow = moves.forward[0] + this.row
+    const newCol = moves.forward[1] + this.col
+    const cell = cells.find(cell => cell.row == newRow && cell.col == newCol)
+    const space = cell.div
+    if (space == null) return
+    space.appendChild(this.piece)
+    this.row = newRow
+    this.col = newCol
   }
+ 
 
   jumped() {
     this.nowjumped = true
@@ -110,6 +95,10 @@ const p1w = new Pawn(4,4,"black")
 
 console.log(p1w.moves)
 console.log(p1w.nowjumped)
-console.log(p1w.showMoves())
+
 
 console.log(cells)
+
+board.addEventListener('click', e => {
+  console.log(e.target)
+})
