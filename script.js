@@ -79,11 +79,11 @@ class Pawn{
 
     const leftatk = moves.leftatk
     const leftatkcell = cells.find(cell =>
-      cell.row == leftatk[0] + this.row && leftatk[1] + this.col)
+      cell.row == leftatk[0] + this.row && cell.col == leftatk[1] + this.col)
 
     const rightatk = moves.rightatk
     const rightatkcell = cells.find(cell =>
-      cell.row == rightatk[0] + this.row && rightatk[1] + this.col)
+      cell.row == rightatk[0] + this.row && cell.col == rightatk[1] + this.col)
     
     return {
       step: forwardcell,
@@ -106,7 +106,7 @@ class Pawn{
   }
 }
 
-const p1w = new Pawn(7,5,"white")
+const p1w = new Pawn(4,4,"black")
 
 console.log(p1w.moves)
 console.log(p1w.nowjumped)
