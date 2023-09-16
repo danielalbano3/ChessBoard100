@@ -57,29 +57,41 @@ class Pawn{
   allmoves(){
     const x = this.color === 'white' ? -1 : 1
     const moves = {
-      jump: [2*x,0],
       forward: [1*x,0],
+      jump: [2*x,0],
       leftatk: [1*x,-1],  //enpassant L
       rightatk: [1*x,1]   //enpassant R
     }
     return moves
   }
 
-  forward(){
+  go(choice){
     const moves = this.allmoves()
-    const newRow = moves.forward[0] + this.row
-    const newCol = moves.forward[1] + this.col
+    let delta
+    switch(choice){
+      case 'forward':
+        delta = moves.forward
+        break
+      case 'jump':
+        delta = moves.jump
+        break
+      case 'left':
+        delta = moves.leftatk
+        break
+      case 'right':
+        delta = moves.rightatk
+        break
+      default:
+        return
+    }
+    const newRow = delta[0] + this.row
+    const newCol = delta[1] + this.col
     const cell = cells.find(cell => cell.row == newRow && cell.col == newCol)
     const space = cell.div
     if (space == null) return
     space.appendChild(this.piece)
     this.row = newRow
     this.col = newCol
-  }
- 
-
-  jumped() {
-    this.nowjumped = true
   }
 
   moveTo(row,col){
