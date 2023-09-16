@@ -6,24 +6,28 @@ let turn = 'white'
 board.classList.add("board")
 document.body.appendChild(board)
 
+class Cell{
+  constructor(row,col,space){
+    this.row = row,
+    this.col = col,
+    this.div = space
+    cells.push(this)
+  }
+}
+
 for (let r = 1; r <= 8; r++) {
   for (let c = 1; c <= 8; c++) {
     const space = document.createElement("div")
     space.classList.add("space")
     space.dataset.row = r
     space.dataset.col = c
-    const cell = {
-      row: r,
-      col: c,
-      div: space
-    }
+    const cell = new Cell(r,c,space)
     if (c % 2 === 0) {
       space.classList.add(switchColor(r)[0])
     } else {
       space.classList.add(switchColor(r)[1])
     }
     board.appendChild(space)
-    cells.push(cell)
   }
 }
 const spaces = document.querySelectorAll(".space")
@@ -56,7 +60,6 @@ class ChessPiece{
     this.col = col
     this.color = color
   }
-
   moveTo(row,col){
     const cell = cells.find(cell => cell.row == row && cell.col == col)
     const space = cell.div
@@ -110,10 +113,8 @@ class Pawn extends ChessPiece {
     }
     return moves   
   }
-
   pawnAreas(){
     const moves = this.pawnMoves()
-    const enPassantRow = this.color === 'white' ? 6 : 2
     const cells = {
       forward: cells.find(cell => cell.row == this.row + moves.forward[0] && cell.col == this.col + moves.forward[1]),
       jump: cells.find(cell => cell.row == this.row + moves.jump[0] && cell.col == this.col + moves.jump[1]),
