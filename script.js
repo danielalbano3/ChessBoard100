@@ -1,7 +1,9 @@
 const board = document.createElement("div")
 const cells = []
+let turn = 'white'
 board.classList.add("board")
 document.body.appendChild(board)
+
 for (let i = 1; i <= 8; i++) {
   for (let j = 1; j <= 8; j++) {
     const space = document.createElement("div")
@@ -11,7 +13,8 @@ for (let i = 1; i <= 8; i++) {
     const cell = {
       row: i,
       col: j,
-      div: space
+      div: space,
+      owner: space.firstChild
     }
     if (j % 2 === 0) {
       space.classList.add(switchColor(i)[0])
@@ -23,6 +26,7 @@ for (let i = 1; i <= 8; i++) {
   }
 }
 const spaces = document.querySelectorAll(".space")
+
 function switchColor(number) {
   const colorpair = []
   if (number % 2 === 0) {
@@ -35,17 +39,44 @@ function switchColor(number) {
   return colorpair
 }
 
-class Pawn{
+function resetHighlight(){
+  spaces.forEach(space => {
+    space.classList.remove('.valid')
+  })
+}
+
+function nextTurn(){
+  turn = turn === 'white' ? 'black' : 'white'
+}
+
+class ChessPiece{
   constructor(row,col,color){
     this.row = row
     this.col = col
     this.color = color
-    this.kind = "pawn"
-    this.nowjumped = false
-    this.piece = this.render()
-    this.moveTo(row,col)
   }
-
+  moveTo(row,col){
+    const cell = cells.find(cell => cell.row == row && cell.col == col)
+    const space = cell.div
+    if (cell == null) return
+    if (this.isEmpty(cell)){
+      space.appendChild(this.piece)
+      this.row = row
+      this.col = col
+    } else {
+      if (cell.owner.dataset.color !== turn){
+        space.removeChild(cell.owner)
+        space.appendChild(this.piece)
+        this.row = row
+        this.col = col
+      } else {
+        return
+      }
+    }
+  }
+  isEmpty(cell){
+    return cell.owner == null
+  }
   render(){
     const piece = document.createElement('div')
     piece.dataset.piece = this.kind
@@ -53,8 +84,17 @@ class Pawn{
     piece.classList.add('piece')
     return piece
   }
+}
 
-  allmoves(){
+class Pawn extends ChessPiece {
+  constructor(row,col,color){
+    super(row,col,color)
+    this.kind = "pawn"
+    this.nowjumped = false
+    this.piece = this.render()
+    this.moveTo(row,col)
+  }
+  pawnMoves(){
     const x = this.color === 'white' ? -1 : 1
     const moves = {
       forward: [1*x,0],
@@ -64,9 +104,8 @@ class Pawn{
     }
     return moves
   }
-
   go(choice){
-    const moves = this.allmoves()
+    const moves = this.pawnMoves()
     let delta
     switch(choice){
       case 'forward':
@@ -86,20 +125,7 @@ class Pawn{
     }
     const newRow = delta[0] + this.row
     const newCol = delta[1] + this.col
-    const cell = cells.find(cell => cell.row == newRow && cell.col == newCol)
-    const space = cell.div
-    if (space == null) return
-    space.appendChild(this.piece)
-    this.row = newRow
-    this.col = newCol
-  }
-
-  moveTo(row,col){
-    const cell = cells.find(cell => cell.row == row && cell.col == col)
-    const space = cell.div
-    space.appendChild(this.piece)
-    this.row = row
-    this.col = col
+    this.moveTo(newRow,newCol)
   }
 }
 
@@ -114,3 +140,4 @@ console.log(cells)
 board.addEventListener('click', e => {
   console.log(e.target)
 })
+
