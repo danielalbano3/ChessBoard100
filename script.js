@@ -1,6 +1,5 @@
 const cells = []
-let topPieces = []
-let bottomPieces = []
+let pieces = []
 let turnCount = 1
 let turn = 'top' 
 
@@ -51,8 +50,10 @@ class Pawn extends Piece{
     this.kind = 'pawn'
     this.jumptime = null
     this.direction = side === 'top' ? 1 : -1
+    this.commandSize = 6
     this.moves = this.getSpaces()
     this.enter(getCell(this.row,this.col))
+    pieces.push(this)
   }
 
   getSpaces(){
@@ -107,6 +108,7 @@ class Pawn extends Piece{
       case 0://forward
         const forward = cells.find(c => c.signal === 'forward')
         if (forward != null) this.enter(forward)
+        console.log('forwarded')
         break
       case 1://jump
         const jump = cells.find(c => c.signal === 'jump')
@@ -114,6 +116,7 @@ class Pawn extends Piece{
           this.enter(jump)
           this.jumptime = turnCount
         }
+        console.log('jumped')
         break
       case 2://leftatk
         const leftatk = cells.find(c => c.signal === 'leftatk')
@@ -121,6 +124,7 @@ class Pawn extends Piece{
           leftatk.owner = null
           this.enter(leftatk)
         }
+        console.log('leftatk')
         break
       case 3://rightatk
         const rightatk = cells.find(c => c.signal === 'rightatk')
@@ -128,6 +132,7 @@ class Pawn extends Piece{
           rightatk.owner = null
           this.enter(rightatk)
         }
+        console.log('rightatk')
         break
       case 4://leftenpassant
         const leftep = cells.find(c => c.signal === 'leftatk ep')
@@ -136,6 +141,7 @@ class Pawn extends Piece{
           left.owner = null
           this.enter(leftep)
         }
+        console.log('enpass left')
         break
       case 5://rightenpassant
         const rightep = cells.find(c => c.signal === 'rightatk ep')
@@ -144,6 +150,7 @@ class Pawn extends Piece{
           right.owner = null
           this.enter(rightep)
         }
+        console.log('enpass right')
         break
       default:
         return
@@ -157,3 +164,30 @@ const p2 = new Pawn(2,2,'bottom')
 
 p1.commands(5)
 console.log(cells)
+
+class AIPlayer{
+  constructor(side){
+    this.side = side
+    this.piece = null
+  }
+
+  randomPick(max){
+    return Math.floor(Math.random() * max)
+  }
+
+  selectPiece(){
+    const choices = pieces.filter(piece => piece.side === this.side)
+    const number = this.randomPick(choices.length)
+    this.piece = choices(number)
+  }
+
+  selectCommand(){
+    const commandWeight = this.piece.commandSize
+    const randomCommand = this.randomPick(commandWeight)
+    this.piece.commands(randomCommand)
+  }
+}
+
+const bob = new AIPlayer('top')
+bob.selectPiece()
+bob.selectCommand()
