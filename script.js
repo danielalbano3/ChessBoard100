@@ -84,11 +84,18 @@ class Pawn extends Piece{
   }
 
   commands(choice){
+    this.showSpaces()
     switch(choice){
       case 0://forward
+        const forward = cells.find(c => c.signal === 'forward')
+        if (forward != null) this.enter(forward)
         break
       case 1://jump
-        this.jumptime = turnCount
+        const jump = cells.find(c => c.signal === 'jump')
+        if (jump != null) {
+          this.enter(jump)
+          this.jumptime = turnCount
+        }
         break
       case 2://leftatk
         break
@@ -103,6 +110,5 @@ class Pawn extends Piece{
 const p1 = new Pawn(2,1,'top')
 const p2 = new Pawn(3,2,'bottom')
 
-p2.showSpaces()
-p1.showSpaces()
 console.log(cells)
+p1.commands(1)
