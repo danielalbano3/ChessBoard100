@@ -2,7 +2,7 @@ const cells = []
 let topPieces = []
 let bottomPieces = []
 let turnCount = 1
-let turn = 'bottom' 
+let turn = 'top' 
 
 class Cell{
   constructor(row,col){
@@ -52,7 +52,6 @@ class Pawn extends Piece{
     this.jumptime = null
     this.direction = side === 'top' ? 1 : -1
     this.moves = this.getSpaces()
-    side === 'top' ? topPieces.push(this) : bottomPieces.push(this)
     this.enter(getCell(this.row,this.col))
   }
 
@@ -73,14 +72,33 @@ class Pawn extends Piece{
     const jump = move.jump
     const leftatk = move.leftatk
     const rightatk = move.rightatk
+    const left = move.left
+    const right = move.right
     cells.forEach(c => c.signal = null)
     //forward
     if (forward != null && forward.owner === null) forward.signal = 'forward'
     //jump
     if (jump != null && jump.owner === null && forward.owner === null && this.jumptime === null) jump.signal = 'jump'
     //leftatk
-
+    if (leftatk != null && leftatk.owner != null){
+      if (leftatk.owner.kind === 'pawn' && leftatk.owner.side != turn) leftatk.signal = 'leftatk'
+    }
     //rightatk
+    if (rightatk != null && rightatk.owner != null){
+      if (rightatk.owner.kind === 'pawn' && rightatk.owner.side != turn) rightatk.signal = 'rightatk'
+    }
+    //leftatk enpassant
+    if (leftatk != null && leftatk.owner == null){
+      if (left.owner != null){
+        if (left.owner.kind === 'pawn' && left.owner.side != turn) leftatk.signal = 'leftatk ep'
+      }
+    }
+    //rightatk enpassant
+    if (rightatk != null && rightatk.owner == null){
+      if (right.owner != null){
+        if (right.owner.kind === 'pawn' && right.owner.side != turn) rightatk.signal = 'rightatk ep'
+      }
+    }
   }
 
   commands(choice){
@@ -98,17 +116,44 @@ class Pawn extends Piece{
         }
         break
       case 2://leftatk
+        const leftatk = cells.find(c => c.signal === 'leftatk')
+        if (leftatk != null){
+          leftatk.owner = null
+          this.enter(leftatk)
+        }
         break
       case 3://rightatk
+        const rightatk = cells.find(c => c.signal === 'rightatk')
+        if (rightatk != null){
+          rightatk.owner = null
+          this.enter(rightatk)
+        }
+        break
+      case 4://leftenpassant
+        const leftep = cells.find(c => c.signal === 'leftatk ep')
+        const left = this.moves.left
+        if (leftep != null){
+          left.owner = null
+          this.enter(leftep)
+        }
+        break
+      case 5://rightenpassant
+        const rightep = cells.find(c => c.signal === 'rightatk ep')
+        const right = this.moves.right
+        if (rightep != null){
+          right.owner = null
+          this.enter(rightep)
+        }
         break
       default:
         return
     }
+    // cells.forEach(c => c.signal = null)
   }
 }
 
 const p1 = new Pawn(2,1,'top')
-const p2 = new Pawn(3,2,'bottom')
+const p2 = new Pawn(2,2,'bottom')
 
+p1.commands(5)
 console.log(cells)
-p1.commands(1)
