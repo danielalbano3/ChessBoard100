@@ -181,6 +181,26 @@ const p2 = new Pawn(2,2,'bottom')
 p1.commands(5)
 console.log(cells)
 
+function renderBoard(){
+  const piece = document.createElement('div')
+  piece.classList.add('piece')
+
+  cells.forEach(cell => {
+    const square = cell.square
+    if (square.firstChild != null) square.removeChild(square.firstChild)
+    if (cell.owner == null) {
+      return
+    } else {
+      const kind = cell.owner.kind
+      const side = cell.owner.side
+      piece.classList.add(kind)
+      piece.classList.add(side)
+      square.appendChild(piece)
+    }
+    
+  })
+}
+
 class AIPlayer{
   constructor(side){
     this.side = side
@@ -202,6 +222,7 @@ class AIPlayer{
     const commandWeight = this.piece.commandSize
     const randomCommand = this.randomPick(commandWeight)
     this.piece.commands(randomCommand)
+    renderBoard()
   }
 }
 
