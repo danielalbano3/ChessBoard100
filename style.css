@@ -40,19 +40,19 @@ body {
 #board {
   aspect-ratio: 1/1;
   min-height:50vh;
-  border:1px solid white;
+  border:1px solid var(--color);
   display:grid;
   grid-template: repeat(8, 1fr) / repeat(8, 1fr);
 }
 
-/* .cell {
-
-} */
-
 .orange {
-  background: hsl(39, 100%, 50%);
+  background: hsl(39, var(--sat, 30%), 50%);
 }
 
-.brown {
-  background: hsl(0, 59%, 41%);
+.tan {
+  background: hsl(34, var(--sat, 44%), 69%)
+}
+
+.active {
+  --sat: 100%;
 }

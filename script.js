@@ -1,4 +1,7 @@
 const board = document.querySelector('#board')
+const root = document.querySelector(':root')
+
+root.style.setProperty('--color', 'white')
 
 const cells = []
 let pieces = []
@@ -27,13 +30,15 @@ for (let r = 1; r <= 8; r++){
   for (let c = 1; c <= 8; c++){
     const cell = new Cell(r,c)
     if (r % 2 == 0){
-      cell.color = c % 2 == 0 ? 'orange' : 'brown'
+      cell.color = c % 2 == 0 ? 'orange' : 'tan'
     } else {
-      cell.color = c % 2 == 0 ? 'brown' : 'orange'
+      cell.color = c % 2 == 0 ? 'tan' : 'orange'
     }
     cell.square.classList.add(cell.color)
   }
 }
+
+const spaces = document.querySelectorAll('.cell')
 
 function getCell(row,col){
   return cells.find(cell => cell.row === row && cell.col === col)
