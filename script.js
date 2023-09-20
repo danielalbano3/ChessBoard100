@@ -1,3 +1,5 @@
+const board = document.querySelector('#board')
+
 const cells = []
 let pieces = []
 let turnCount = 1
@@ -9,7 +11,15 @@ class Cell{
     this.col = col
     this.owner = null
     this.signal = null
+    this.square = this.add()
     cells.push(this)
+  }
+
+  add(){
+    const div = document.createElement('div')
+    div.classList.add('cell')
+    board.appendChild(div)
+    return div
   }
 }
 
@@ -21,6 +31,7 @@ for (let r = 1; r <= 8; r++){
     } else {
       cell.color = c % 2 == 0 ? 'brown' : 'orange'
     }
+    cell.square.classList.add(cell.color)
   }
 }
 
@@ -178,7 +189,8 @@ class AIPlayer{
   selectPiece(){
     const choices = pieces.filter(piece => piece.side === this.side)
     const number = this.randomPick(choices.length)
-    this.piece = choices(number)
+    this.piece = choices[number]
+    console.log(this.piece)
   }
 
   selectCommand(){
