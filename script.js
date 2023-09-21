@@ -1,41 +1,37 @@
 const board = document.querySelector('#board')
 
 let turnCount = 1
-let turn = 'black' 
-const cells = []
+let turn = 'white' 
+const spaces = []
+let pieces = []
 
-class Cell{
-  constructor(row,col){
-    this.row = row
-    this.col = col
-    cells.push(this)
-    
-    const div = document.createElement('div')
-    div.classList.add('cell')
-    board.appendChild(div)
-    this.div = div
-    
-    this.owner = this.div.firstChild
-  }
 
-}
-
-let cellColor = null
 for (let r = 1; r <= 8; r++){
   for (let c = 1; c <= 8; c++){
-    const cell = new Cell(r,c)
+    const space = document.createElement('div')
+    space.dataset.row = r
+    space.dataset.col = c
     if (r % 2 == 0){
       cellColor = c % 2 == 0 ? 'orange' : 'tan'
     } else {
       cellColor = c % 2 == 0 ? 'tan' : 'orange'
     }
-    cell.div.classList.add(cellColor)
+    space.classList.add('space',cellColor)
+    spaces.push(space)
+    board.appendChild(space)
   }
 }
 
+function getSpace(row,col){
+  return spaces.find(s => parseInt(s.dataset.row) === row && parseInt(s.dataset.col) === col)
+}
 
-function getCell(row,col){
-  return cells.find(cell => cell.row === row && cell.col === col)
+function getPiece(htmldiv){
+  return pieces.find(p => p.piece === htmldiv)
+}
+
+function isWhite(htmldiv){
+  return htmldiv.classList.contains('white')
 }
 
 class Piece{
@@ -43,76 +39,76 @@ class Piece{
     this.row = row
     this.col = col
     this.side = side
+
+    const div = document.createElement('div')
+    div.classList.add('piece', this.side)
+    getSpace(this.row,this.col).appendChild(div)
+
+    this.piece = div
+    pieces.push(this)
   }
+
 }
 
 class Pawn extends Piece{
   constructor(row,col,side){
     super(row,col,side)
     this.kind = 'pawn'
-    this.jumptime = null
-    this.direction = side === 'top' ? 1 : -1
-    this.spaces = {
-      forward:    getCell(this.row + this.direction,this.col),       
-      jump:       getCell(this.row + this.direction * 2,this.col),  
-      leftAtk:    getCell(this.row + this.direction,this.col - 1),   
-      rightAtk:   getCell(this.row + this.direction,this.col + 1),
-
-      leftSide:   getCell(this.row,this.col - 1),                    
-      rightSide:  getCell(this.row,this.col + 1),                    
-    }
-    // this.moves = this.testMoves()
-    this.cell = getCell(this.row,this.col)
-    const cell = this.cell
-    cell.owner = this
-    // this.piece = this.addHtml()
-
-    
-    const div = document.createElement('div')
-    div.classList.add('piece','pawn',this.side)
-    const space = cell.div
-    space.appendChild(div)
-    this.piece = div
-    
+    this.jumptime = 0
+    this.moved = false
+    this.direction = side === 'black' ? 1 : -1
+    this.piece.classList.add(this.kind)
   }
 
-  // addHtml(){
-  //   const div = document.createElement('div')
-  //   div.classList.add('piece')
-  //   div.classList.add('pawn')
-  //   div.classList.add(this.side)
-  //   const cell = this.cell
-  //   const space = cell.div
-  //   space.appendChild(div)
-  //   return div
-  // }
+  moveTo(space){
+    space.appendChild(this.piece)
+    this.getLocation()
+  }
 
-  // getSpaces(){
-  //   return {
-  //     forward:    getCell(this.row + this.direction,this.col),       
-  //     jump:       getCell(this.row + this.direction * 2,this.col),  
-  //     leftAtk:    getCell(this.row + this.direction,this.col - 1),   
-  //     rightAtk:   getCell(this.row + this.direction,this.col + 1),
+  getLocation(){
+    const loc = spaces.find(s => s.firstChild === this.piece)
+    this.row = parseInt(loc.dataset.row)
+    this.col = parseInt(loc.dataset.col)
+  }
 
-  //     leftSide:   getCell(this.row,this.col - 1),                    
-  //     rightSide:  getCell(this.row,this.col + 1),                    
-  //   }
-  // }
+  getMoves(){
+    this.getLocation()
+    const moves = []
+    const areas = {
+      forwardArea: getSpace(this.row + this.direction,this.col),
+      jumpArea: getSpace(this.row + 2 * this.direction,this.col),
+      leftAtk: getSpace(this.row + this.direction,this.col - 1),
+      rightAtk: getSpace(this.row + this.direction,this.col + 1),
+      sideLeft: getSpace(this.row,this.col - 1),
+      sideRight: getSpace(this.row,this.col + 1),
+    }
 
-  // moveForward(){
-  //   const space = this.spaces
-  //   const forwardCell = space.forward
-  //   if (forwardCell == null || forwardCell.owner != null) return null
-  // }
+    if (areas.forwardArea != null && areas.forwardArea.firstChild == null){
+      moves.push({
+        fn: () => {
+          this.moveTo(areas.forwardArea)
+        },
+        destination: areas.forwardArea
+      })
+    }
 
-  // testMoves(){
-  //   const validMoves = []
-  //   const moves = [this.moveForward]
-  //   moves.forEach(move => {
-  //     if (move() == null) validMoves.push(move)
-  //   })
-  //   return validMoves
-  // }
+    return moves
+  }
+
+  commands(option){
+    const tasks = this.getMoves()
+    const length = tasks.length
+    //forward
+    
+    //jump
+    //leftatk
+    //rightatk
+    //epLeft
+    //epRight
+
+    tasks[option].fn()
+    this.moved = true
+  }
 }
 
 class AIPlayer{
@@ -134,12 +130,21 @@ class AIPlayer{
   }
 }
 
-// function abc(){if (false) return 5;console.log('yes');}
-// function def(){return null}
+const p1b = new Pawn(1,3,'black')
+const p1w = new Pawn(1,2,'white')
 
-// const ghi = [abc,def]
-// const jkl = []
-// ghi.forEach(fn => {if (fn() == null) jkl.push(fn)})
-// console.log(jkl)
+const selectedPiece = []
+document.body.addEventListener('click', e => {
+  if (turn === 'black') return
+  if (!e.target.classList.contains('piece') && !e.target.classList.contains('space')) return
+  
+  if (e.target.classList.contains('white') && e.target.classList.contains('piece')) {
+    selectedPiece[0] = e.target
+  } else {
+    //react if target is valid and run command
+    //commands[0]...[n]
+    return
+  }
+  
+})
 
-const p1 = new Pawn(1,1,'top')

@@ -45,9 +45,7 @@ body {
   grid-template: repeat(8, 1fr) / repeat(8, 1fr);
 }
 
-.cell {
-  aspect-ratio: 1/1;
-  width:100%;
+.space {
   display:flex;
   justify-content:center;
   align-items:center;
@@ -70,10 +68,10 @@ body {
   width:80%;
 }
 
-.top {
+.black {
   background: black;
 }
 
-.bottom {
-  background: 'white';
+.white {
+  background: white;
 }
