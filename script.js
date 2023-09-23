@@ -80,7 +80,6 @@ class Pawn extends Piece{
       Left: getSpace(this.row,this.col - 1),
       Right: getSpace(this.row,this.col + 1),
     }
-
     return areas
   }
 
@@ -127,7 +126,6 @@ class Pawn extends Piece{
 
   commands(){
     const moves = this.getMoves()
-    if (moves.length === 0) return null
 
     const validCommands = []
     const areas = this.getAreas()
@@ -187,11 +185,15 @@ class Pawn extends Piece{
 
   execute(command){
     const allCommands = this.commands()
-    if (allCommands == null) return null
-    command = command % allCommands.length
-    allCommands[command]()
-    this.moved = true
-    spaces.forEach(s => s.classList.remove('active','selected'))
+    if (allCommands.length === 0) {
+      return
+    } else {
+      command = command % allCommands.length
+      allCommands[command]()
+      this.moved = true
+      spaces.forEach(s => s.classList.remove('active','selected'))
+      nextTurn()
+    } 
   }
 
 }
@@ -202,28 +204,49 @@ class AIPlayer {
   }
 
   selectPiece(){
-    const pcs = pieces.filter(p => {
-      p.classList.contains('black')
-    })
+    const pcs = pieces.filter(p => p.side === 'black')
     let length = pcs.length
     this.piece = pcs[this.randomPick(length)]
   }
 
   selectCommand(){
-    if (this.piece == null) return console.log('no piece selected')
-    let pieceAI = getPiece(this.piece)
-    let moves = pieceAI.getMoves()
-    let length = moves.length
-    let randomChoice = this.randomPick(length)
-    pieceAI.commands(randomChoice)
+    if (this.piece.commands().length === 0) {
+      this.auto() 
+      return
+    }
+    this.piece.execute(this.randomPick(this.piece.commands().length))
+  }
+
+  auto(){
+    const pcs = pieces.filter(p => p.side === 'black')
+    if (pcs.length === 0){
+      return
+    } else {
+      pcs.length > 1 ? this.selectPiece() : this.piece = pcs[0]
+      if (this.piece.commands().length === 0 && pcs.length === 1) return
+      this.selectCommand()
+    }
   }
 }
 
 const bob = new AIPlayer()
-const p1b = new Pawn(8,1,'black')
-const p1w = new Pawn(1,2,'white')
-const p2w = new Pawn(4,4,'white')
+const p1b = new Pawn(2,1,'black')
+const p2b = new Pawn(2,2,'black')
+const p3b = new Pawn(2,3,'black')
+const p4b = new Pawn(2,4,'black')
+const p5b = new Pawn(2,5,'black')
+const p6b = new Pawn(2,6,'black')
+const p7b = new Pawn(2,7,'black')
+const p8b = new Pawn(2,8,'black')
 
+const p1w = new Pawn(7,1,'white')
+const p2w = new Pawn(7,2,'white')
+const p3w = new Pawn(7,3,'white')
+const p4w = new Pawn(7,4,'white')
+const p5w = new Pawn(7,5,'white')
+const p6w = new Pawn(7,6,'white')
+const p7w = new Pawn(7,7,'white')
+const p8w = new Pawn(7,8,'white')
 
 document.body.addEventListener('click', e => {
   if (turn === 'black') return
@@ -241,13 +264,11 @@ document.body.addEventListener('click', e => {
     highlightSelected()
   } 
   
-  if (selectedPiece != null && space.classList.contains('active')) {
+  if (space.classList.contains('active')) {
     selectedPiece.getMoves().forEach(m => {
       movesArr.push(m.move.space)
     })
-    console.log(movesArr)
     let index = movesArr.indexOf(space)
-    console.log(index)
     selectedPiece.execute(index)
   }
 
@@ -273,4 +294,10 @@ function getData(space){
 function getPiece(piece){
   if (piece == null) return null
   return pieces.find(p => p.piece === piece)
+}
+
+function nextTurn(){
+  turnCount++
+  turn = turnCount % 2 === 0 ? 'black' : 'white'
+  if (turn === 'black') bob.auto()
 }
