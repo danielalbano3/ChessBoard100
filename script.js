@@ -199,21 +199,78 @@ class Pawn extends Piece {
 
 }
 
-/*
+
 class Rook extends Piece {
   constructor(row,col,side) {
     super(row,col,side)
     this.kind = 'rook'
-    this.piece.classList.add(this.side)
+    this.piece.classList.add(this.kind)
   }
 
   getMoves(){ //return array of spaces
     const moves = []
+    for (let up = 1; up <= 8; up++) {
+      let space = getSpace(this.row - up,this.col)
+      let sData = getData(space)
+      if (space == null || sData == null) break
+      if (sData.owner == null) {
+        moves.push(space)
+      } else {
+        if (sData.ownerData.side === this.side) break
+        if (sData.ownerData.side !== this.side) {
+          moves.push(space)
+          break
+        }
+      }
+    }
+    for (let down = 1; down <= 8; down++) {
+      let space = getSpace(this.row + down,this.col)
+      let sData = getData(space)
+      if (space == null || sData == null) break
+      if (sData.owner == null) {
+        moves.push(space)
+      } else {
+        if (sData.ownerData.side === this.side) break
+        if (sData.ownerData.side !== this.side) {
+          moves.push(space)
+          break
+        }
+      }
+    }
+    for (let L = 1; L <= 8; L++) {
+      let space = getSpace(this.row,this.col - L)
+      let sData = getData(space)
+      if (space == null || sData == null) break
+      if (sData.owner == null) {
+        moves.push(space)
+      } else {
+        if (sData.ownerData.side === this.side) break
+        if (sData.ownerData.side !== this.side) {
+          moves.push(space)
+          break
+        }
+      }
+    }
+    for (let R = 1; R <= 8; R++) {
+      let space = getSpace(this.row,this.col + R)
+      let sData = getData(space)
+      if (space == null || sData == null) break
+      if (sData.owner == null) {
+        moves.push(space)
+      } else {
+        if (sData.ownerData.side === this.side) break
+        if (sData.ownerData.side !== this.side) {
+          moves.push(space)
+          break
+        }
+      }
+    }
 
-    // spaces.forEach(s => s.classList.remove('active'))
+    //inrook for king
+
     resetActive()
     moves.forEach(m => {
-      m.move.space.classList.add('active')
+      m.classList.add('active')
     })
     return moves
   }
@@ -225,10 +282,10 @@ class Rook extends Piece {
   }
 
   execute(command){
-
+    return
   }
 }
-*/
+
 
 class AIPlayer {
   randomPick(max){
@@ -284,6 +341,7 @@ const p5w = new Pawn(7,5,'white')
 const p6w = new Pawn(7,6,'white')
 const p7w = new Pawn(7,7,'white')
 const p8w = new Pawn(7,8,'white')
+const r1w = new Rook(8,1,'white')
 
 document.body.addEventListener('click', e => {
   if (turn === 'black') return
@@ -312,8 +370,6 @@ document.body.addEventListener('click', e => {
 })
 
 function highlightSelected(){
-  // spaces.forEach(s => s.classList.remove('selected'))
-  // resetActive()
   const space = selectedPiece.getLocation()
   space.classList.add('selected')
 }
