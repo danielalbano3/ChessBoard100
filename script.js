@@ -61,7 +61,7 @@ class Piece{
   }
 }
 
-class Pawn extends Piece{
+class Pawn extends Piece {
   constructor(row,col,side){
     super(row,col,side)
     this.kind = 'pawn'
@@ -196,6 +196,14 @@ class Pawn extends Piece{
     } 
   }
 
+}
+
+class Rook extends Piece {
+  constructor(row,col,side) {
+    super(row,col,side)
+    this.kind = 'rook'
+    this.piece.classList.add(this.side)
+  }
 }
 
 class AIPlayer {
