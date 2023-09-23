@@ -5,7 +5,7 @@ let turnCount = 1
 let turn = 'white' 
 let pieces = []
 let selectedPiece = null
-
+const resetActive = () => {spaces.forEach(s => s.classList.remove('active','selected'))}
 
 for (let r = 1; r <= 8; r++){
   for (let c = 1; c <= 8; c++){
@@ -116,8 +116,8 @@ class Pawn extends Piece {
         rightSide.ownerData.side !== this.side &&
         rightSide.ownerData.kind === 'pawn' &&
         turnCount - parseInt(rightSide.ownerData.jumptime) === 1) moves.push({move: rAtk, moveName: 'enPassant Right'})
-          
-    spaces.forEach(s => s.classList.remove('active'))
+
+    resetActive()
     moves.forEach(m => {
       m.move.space.classList.add('active')
     })
@@ -191,20 +191,44 @@ class Pawn extends Piece {
       command = command % allCommands.length
       allCommands[command]()
       this.moved = true
-      spaces.forEach(s => s.classList.remove('active','selected'))
+      // spaces.forEach(s => s.classList.remove('active','selected'))
+      resetActive()
       nextTurn()
     } 
   }
 
 }
 
+/*
 class Rook extends Piece {
   constructor(row,col,side) {
     super(row,col,side)
     this.kind = 'rook'
     this.piece.classList.add(this.side)
   }
+
+  getMoves(){ //return array of spaces
+    const moves = []
+
+    // spaces.forEach(s => s.classList.remove('active'))
+    resetActive()
+    moves.forEach(m => {
+      m.move.space.classList.add('active')
+    })
+    return moves
+  }
+
+  commands(){//return array of what to add/remove on board
+    const tasks = []
+
+    return tasks
+  }
+
+  execute(command){
+
+  }
 }
+*/
 
 class AIPlayer {
   randomPick(max){
@@ -213,12 +237,17 @@ class AIPlayer {
 
   selectPiece(){
     const pcs = pieces.filter(p => p.side === 'black')
-    let length = pcs.length
-    this.piece = pcs[this.randomPick(length)]
+    if (pcs.length === 0) {
+      return
+    } else {
+      let length = pcs.length
+      this.piece = pcs[this.randomPick(length)]
+    }
   }
 
   selectCommand(){
     if (this.piece.commands().length === 0) {
+      pieces = pieces.filter(p => p !== this.piece)
       this.auto() 
       return
     }
@@ -283,7 +312,8 @@ document.body.addEventListener('click', e => {
 })
 
 function highlightSelected(){
-  spaces.forEach(s => s.classList.remove('selected'))
+  // spaces.forEach(s => s.classList.remove('selected'))
+  // resetActive()
   const space = selectedPiece.getLocation()
   space.classList.add('selected')
 }
