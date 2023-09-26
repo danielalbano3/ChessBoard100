@@ -343,6 +343,95 @@ class Knight extends Piece {
   }
 }
 
+class Bishop extends Piece {
+  constructor(row,col,side) {
+    super(row,col,side)
+    this.kind = 'bishop'
+    this.piece.classList.add(this.kind)
+  }
+
+  getAreas(){
+    this.getLocation()
+    const areas = []
+
+    for (let ne = 1; ne < 8; ne++){
+      const cell = getSpace(this.row - ne,this.col + ne)
+      if (cell == null) break
+      const c = getData(cell)
+      if (c.piece == null) areas.push(cell)
+      if (c.piece != null && c.data.side == this.side) break
+      if (c.piece != null && c.data.side != this.side) {
+        areas.push(cell)
+        break
+      }
+    }
+
+    for (let se = 1; se < 8; se++){
+      const cell = getSpace(this.row + se,this.col + se)
+      if (cell == null) break
+      const c = getData(cell)
+      if (c.piece == null) areas.push(cell)
+      if (c.piece != null && c.data.side == this.side) break
+      if (c.piece != null && c.data.side != this.side) {
+        areas.push(cell)
+        break
+      }
+    }
+
+    for (let sw = 1; sw < 8; sw++){
+      const cell = getSpace(this.row + sw,this.col - sw)
+      if (cell == null) break
+      const c = getData(cell)
+      if (c.piece == null) areas.push(cell)
+      if (c.piece != null && c.data.side == this.side) break
+      if (c.piece != null && c.data.side != this.side) {
+        areas.push(cell)
+        break
+      }
+    }
+
+    for (let nw = 1; nw < 8; nw++){
+      const cell = getSpace(this.row - nw,this.col - nw)
+      if (cell == null) break
+      const c = getData(cell)
+      if (c.piece == null) areas.push(cell)
+      if (c.piece != null && c.data.side == this.side) break
+      if (c.piece != null && c.data.side != this.side) {
+        areas.push(cell)
+        break
+      }
+    }
+    return areas
+  }
+
+  commands(){
+    const triggers = this.getAreas()
+    const validCommands = []
+    const go = target => {
+      this.moved = true
+      this.moveTo(target)
+    } 
+
+    triggers.forEach(t => {
+      const comm = {
+        trigger: t,
+        command(){
+          const enemy = getData(t)
+          if (enemy.piece != null) {
+            t.removeChild(enemy.piece)
+            remove(enemy.data)
+          }
+          go(t)
+        }
+      }
+      validCommands.push(comm)
+    })
+
+    resetActive()
+    validCommands.forEach(c => {c.trigger.classList.add('active')})
+    return validCommands
+  }
+}
 
 class AIPlayer {
   randomPick(max){
@@ -396,6 +485,8 @@ const r1b = new Rook(1,1,'black')
 const r2b = new Rook(1,8,'black')
 const k1b = new Knight(1,2,'black')
 const k2b = new Knight(1,7,'black')
+const b1b = new Bishop(1,3,'black')
+const b2b = new Bishop(1,6,'black')
 
 const p1w = new Pawn(7,1,'white')
 const p2w = new Pawn(7,2,'white')
@@ -409,6 +500,8 @@ const r1w = new Rook(8,1,'white')
 const r2w = new Rook(8,8,'white')
 const k1w = new Knight(8,2,'white')
 const k2w = new Knight(8,7,'white')
+const b1w = new Bishop(8,3,'white')
+const b2w = new Bishop(8,6,'white')
 
 
 let targets = null
