@@ -34,7 +34,6 @@ class Piece{
     this.col = col
     this.side = side
     this.moved = false
-    this.signal = null
 
     const div = document.createElement('div')
     div.classList.add('piece', this.side)
@@ -49,25 +48,20 @@ class Piece{
     this.moveTo(space)
   }
 
-  moveTo(space){
-    space.appendChild(this.piece)
-    this.getLocation()
-  }
-
   getLocation(){
     const loc = spaces.find(s => s.firstChild === this.piece)
+    if (loc == null) return
     this.row = parseInt(loc.dataset.row)
     this.col = parseInt(loc.dataset.col)
     return loc
   }
 
-  isEnemy(piece) {
-    return piece.side !== this.side
+  moveTo(space){
+    space.appendChild(this.piece)
+    this.getLocation()
   }
 
-  isNull(space) {
-    return space == null
-  }
+
 }
 
 class Pawn extends Piece {
@@ -103,7 +97,6 @@ class Pawn extends Piece {
     const goForward = {
       trigger: area.Front,
       command: () => { 
-        resetActive()
         area.Front.classList.add('active')
         go(area.Front) 
       }
@@ -132,6 +125,7 @@ class Pawn extends Piece {
     }
     const LAtkData = getData(area.LAtk)
     if (area.LAtk != null && 
+        LAtkData != null &&
         LAtkData.space != null &&
         LAtkData.space.firstChild != null && 
         LAtkData.data.side !== this.side) validCommands.push(goAttackLeft)
@@ -147,6 +141,7 @@ class Pawn extends Piece {
     }
     const RAtkData = getData(area.RAtk)
     if (area.RAtk != null && 
+        RAtkData != null &&
         RAtkData.space != null &&
         RAtkData.space.firstChild != null && 
         RAtkData.data.side !== this.side) validCommands.push(goAttackRight)
@@ -162,8 +157,10 @@ class Pawn extends Piece {
     } 
     const leftData = getData(area.Left)
     if (area.LAtk != null && 
+        LAtkData != null &&
         LAtkData.space != null &&
         LAtkData.space.firstChild != null && 
+        leftData != null &&
         leftData.space != null &&
         leftData.space.firstChild != null &&
         leftData.data.side !== this.side && leftData.data.kind === 'pawn' &&
@@ -180,8 +177,10 @@ class Pawn extends Piece {
     }
     const rightData = getData(area.Right)
     if (area.Right != null &&
+        RAtkData != null &&
         RAtkData.space != null &&
         RAtkData.space.firstChild != null &&
+        rightData != null &&
         rightData.space != null &&
         rightData.space.firstChild != null &&
         rightData.data.side != this.side &&
@@ -194,7 +193,6 @@ class Pawn extends Piece {
   }
 }
 
-
 class Rook extends Piece {
   constructor(row,col,side) {
     super(row,col,side)
@@ -202,8 +200,89 @@ class Rook extends Piece {
     this.piece.classList.add(this.kind)
   }
 
+  getAreas(){
+    this.getLocation()
+    const areas = []
+    for (let n = 1; n < 8; n++){
+      const cell = getSpace(this.row - n,this.col)
+      if (cell == null) break
+      const c = getData(cell)
+      if (c.piece == null) areas.push(cell)
+      if (c.piece != null && c.data.side == this.side) break
+      if (c.piece != null && c.data.side != this.side) {
+        areas.push(cell)
+        break
+      }
+    }
 
+    for (let e = 1; e < 8; e++){
+      const cell = getSpace(this.row,this.col + e)
+      if (cell == null) break
+      const c = getData(cell)
+      if (c.piece == null) areas.push(cell)
+      if (c.piece != null && c.data.side == this.side) break
+      if (c.piece != null && c.data.side != this.side) {
+        areas.push(cell)
+        break
+      }
+    }
+
+    for (let s = 1; s < 8; s++){
+      const cell = getSpace(this.row + s,this.col)
+      if (cell == null) break
+      const c = getData(cell)
+      if (c.piece == null) areas.push(cell)
+      if (c.piece != null && c.data.side == this.side) break
+      if (c.piece != null && c.data.side != this.side) {
+        areas.push(cell)
+        break
+      }
+    }
+
+    for (let w = 1; w < 8; w++){
+      const cell = getSpace(this.row,this.col - w)
+      if (cell == null) break
+      const c = getData(cell)
+      if (c.piece == null) areas.push(cell)
+      if (c.piece != null && c.data.side == this.side) break
+      if (c.piece != null && c.data.side != this.side) {
+        areas.push(cell)
+        break
+      }
+    }
+
+    return areas
+  }
+
+  commands(){
+    const triggers = this.getAreas()
+    const validCommands = []
+    const go = target => {
+      this.moved = true
+      this.moveTo(target)
+    } 
+
+    triggers.forEach(t => {
+      const comm = {
+        trigger: t,
+        command(){
+          const enemy = getData(t)
+          if (enemy.piece != null) {
+            t.removeChild(enemy.piece)
+            remove(enemy.data)
+          }
+          go(t)
+        }
+      }
+      validCommands.push(comm)
+    })
+
+    validCommands.forEach(c => {c.trigger.classList.add('active')})
+    return validCommands
+  }
 }
+
+
 
 
 class AIPlayer {
@@ -254,6 +333,8 @@ const p5b = new Pawn(2,5,'black')
 const p6b = new Pawn(2,6,'black')
 const p7b = new Pawn(2,7,'black')
 const p8b = new Pawn(2,8,'black')
+const r1b = new Rook(1,1,'black')
+const r2b = new Rook(1,8,'black')
 
 const p1w = new Pawn(7,1,'white')
 const p2w = new Pawn(7,2,'white')
@@ -263,8 +344,8 @@ const p5w = new Pawn(7,5,'white')
 const p6w = new Pawn(7,6,'white')
 const p7w = new Pawn(7,7,'white')
 const p8w = new Pawn(7,8,'white')
-
-/*const r1w = new Rook(8,1,'white')*/
+const r1w = new Rook(8,1,'white')
+const r2w = new Rook(8,8,'white')
 
 let targets = null
 document.body.addEventListener('click', e => {
