@@ -34,6 +34,7 @@ class Piece{
     this.col = col
     this.side = side
     this.moved = false
+    this.signal = null
 
     const div = document.createElement('div')
     div.classList.add('piece', this.side)
@@ -59,6 +60,14 @@ class Piece{
     this.col = parseInt(loc.dataset.col)
     return loc
   }
+
+  isEnemy(piece) {
+    return piece.side !== this.side
+  }
+
+  isNull(space) {
+    return space == null
+  }
 }
 
 class Pawn extends Piece {
@@ -83,120 +92,106 @@ class Pawn extends Piece {
     return areas
   }
 
-  getMoves(){
-    const moves = []
-    const areas = this.getAreas()
-    
-    const front = getData(areas.Front)
-    if (front != null && front.owner == null) moves.push({move: front, moveName: 'Forward'})
-    
-    const jump = getData(areas.Jump)
-    if (front != null && front.owner == null && jump != null && jump.owner == null && this.moved === false) moves.push({move: jump, moveName: 'Jump'})
-    
-    const lAtk = getData(areas.LAtk)
-    if (lAtk != null && lAtk.owner != null && lAtk.ownerData.side !== this.side) moves.push({move: lAtk, moveName: 'Left Attack'})
-    
-    const leftSide = getData(areas.Left)
-    if (lAtk != null && 
-      lAtk.owner == null && 
-      leftSide != null && 
-      leftSide.owner != null && 
-      leftSide.ownerData.side !== this.side &&
-      leftSide.ownerData.kind === 'pawn' &&
-      turnCount - parseInt(leftSide.ownerData.jumptime) === 1) moves.push({move: lAtk, moveName: 'enPassant Left'})
-      
-    const rAtk = getData(areas.RAtk)
-    if (rAtk != null && rAtk.owner != null && rAtk.ownerData.side !== this.side) moves.push({move: rAtk, moveName: 'Right Attack'})
-      
-    const rightSide = getData(areas.Right)
-    if (rAtk != null && 
-        rAtk.owner == null && 
-        rightSide != null && 
-        rightSide.owner != null && 
-        rightSide.ownerData.side !== this.side &&
-        rightSide.ownerData.kind === 'pawn' &&
-        turnCount - parseInt(rightSide.ownerData.jumptime) === 1) moves.push({move: rAtk, moveName: 'enPassant Right'})
-
-    resetActive()
-    moves.forEach(m => {
-      m.move.space.classList.add('active')
-    })
-    return moves
-  }
-
   commands(){
-    const moves = this.getMoves()
-
     const validCommands = []
-    const areas = this.getAreas()
-    const frontSpace = areas.Front
-    const jumpSpace = areas.Jump
-    const leftAtkSpace = areas.LAtk
-    const rightAtkSpace = areas.RAtk
+    const area = this.getAreas()
+    const go = target => {
+      this.moved = true
+      this.moveTo(target)
+    } 
 
-    const leftSide = areas.Left
-    const rightSide = areas.Right
- 
-    const goForward = () => {
-      this.moveTo(frontSpace)
+    const goForward = {
+      trigger: area.Front,
+      command: () => { 
+        resetActive()
+        area.Front.classList.add('active')
+        go(area.Front) 
+      }
+    } 
+    if (area.Front != null && area.Front.firstChild == null) validCommands.push(goForward)
+
+    const goJump = {
+      trigger: area.Jump,
+      command: () => {
+        go(area.Jump)
+        this.jumptime = turnCount
+      }
     }
-    if (moves.some(m => m.moveName === 'Forward')) validCommands.push(goForward)
+    if (this.moved === false && 
+        area.Front != null && area.Front.firstChild == null && 
+        area.Jump != null && area.Jump.firstChild == null) validCommands.push(goJump)
 
-    const goJump = () => {
-      this.moveTo(jumpSpace)
-      this.jumptime = turnCount
+    const goAttackLeft = {
+      trigger: area.LAtk,
+      command: () => {
+        const enemy = getPiece(area.LAtk.firstChild)
+        area.LAtk.removeChild(enemy.piece)
+        remove(enemy)
+        go(area.LAtk)
+      }
     }
-    if (moves.some(m => m.moveName === 'Jump')) validCommands.push(goJump)
+    const LAtkData = getData(area.LAtk)
+    if (area.LAtk != null && 
+        LAtkData.space != null &&
+        LAtkData.space.firstChild != null && 
+        LAtkData.data.side !== this.side) validCommands.push(goAttackLeft)
 
-    const goAtkLeft = () => {
-      const leftatk = getData(leftAtkSpace)
-      pieces = pieces.filter(p => p !== leftatk.ownerData)
-      leftAtkSpace.removeChild(leftatk.owner)
-      this.moveTo(leftAtkSpace)
+    const goAttackRight = {
+      trigger: area.RAtk,
+      command: () => {
+        const enemy = getPiece(area.RAtk.firstChild)
+        area.RAtk.removeChild(enemy.piece)
+        remove(enemy)
+        go(area.RAtk)
+      }
     }
-    if (moves.some(m => m.moveName === 'Left Attack')) validCommands.push(goAtkLeft)
+    const RAtkData = getData(area.RAtk)
+    if (area.RAtk != null && 
+        RAtkData.space != null &&
+        RAtkData.space.firstChild != null && 
+        RAtkData.data.side !== this.side) validCommands.push(goAttackRight)
 
-    const goAtkRight = () => {
-      const rightatk = getData(rightAtkSpace)
-      pieces = pieces.filter(p => p !== rightatk.ownerData)
-      rightAtkSpace.removeChild(rightatk.owner)
-      this.moveTo(rightAtkSpace)
+    const goEnpassantLeft = {
+      trigger: area.LAtk,
+      command: () => {
+        const enemy = getPiece(area.Left.firstChild)
+        area.Left.removeChild(enemy.piece)
+        remove(enemy)
+        go(area.LAtk)
+      }
+    } 
+    const leftData = getData(area.Left)
+    if (area.LAtk != null && 
+        LAtkData.space != null &&
+        LAtkData.space.firstChild != null && 
+        leftData.space != null &&
+        leftData.space.firstChild != null &&
+        leftData.data.side !== this.side && leftData.data.kind === 'pawn' &&
+        turnCount - leftData.data.jumptime === 1) validCommands.push(goEnpassantLeft)
+
+    const goEnpassantRight = {
+      trigger: area.RAtk,
+      command: () => {
+        const enemy = getPiece(area.Right.firstChild)
+        area.Right.removeChild(enemy.piece)
+        remove(enemy)
+        go(area.RAtk)
+      }
     }
-    if (moves.some(m => m.moveName === 'Right Attack')) validCommands.push(goAtkRight)
-
-    const enpassantL = () => {
-      const epL = getData(leftSide)
-      pieces = pieces.filter(p => p !== epL.ownerData)
-      leftSide.removeChild(epL.owner)
-      this.moveTo(leftAtkSpace)
-    }
-    if (moves.some(m => m.moveName === 'enPassant Left')) validCommands.push(enpassantL)
-
-    const enpassantR = () => {
-      const epR = getData(rightSide)
-      pieces = pieces.filter(p => p !== epR.ownerData)
-      rightSide.removeChild(epR.owner)
-      this.moveTo(rightAtkSpace)
-    }
-    if (moves.some(m => m.moveName === 'enPassant Right')) validCommands.push(enpassantR)
-
+    const rightData = getData(area.Right)
+    if (area.Right != null &&
+        RAtkData.space != null &&
+        RAtkData.space.firstChild != null &&
+        rightData.space != null &&
+        rightData.space.firstChild != null &&
+        rightData.data.side != this.side &&
+        rightData.data.kind === 'pawn' &&
+        turnCount - rightData.data.jumptime === 1) validCommands.push(goEnpassantRight)
+    
+    resetActive()
+    validCommands.forEach(c => {c.trigger.classList.add('active')})
     return validCommands
   }
-
-  execute(command){
-    const allCommands = this.commands()
-    if (allCommands.length === 0) {
-      return
-    } else {
-      command = command % allCommands.length
-      allCommands[command]()
-      this.moved = true
-      // spaces.forEach(s => s.classList.remove('active','selected'))
-      resetActive()
-      nextTurn()
-    } 
-  }
-
 }
 
 
@@ -207,83 +202,7 @@ class Rook extends Piece {
     this.piece.classList.add(this.kind)
   }
 
-  getMoves(){ //return array of spaces
-    const moves = []
-    for (let up = 1; up <= 8; up++) {
-      let space = getSpace(this.row - up,this.col)
-      let sData = getData(space)
-      if (space == null || sData == null) break
-      if (sData.owner == null) {
-        moves.push(space)
-      } else {
-        if (sData.ownerData.side === this.side) break
-        if (sData.ownerData.side !== this.side) {
-          moves.push(space)
-          break
-        }
-      }
-    }
-    for (let down = 1; down <= 8; down++) {
-      let space = getSpace(this.row + down,this.col)
-      let sData = getData(space)
-      if (space == null || sData == null) break
-      if (sData.owner == null) {
-        moves.push(space)
-      } else {
-        if (sData.ownerData.side === this.side) break
-        if (sData.ownerData.side !== this.side) {
-          moves.push(space)
-          break
-        }
-      }
-    }
-    for (let L = 1; L <= 8; L++) {
-      let space = getSpace(this.row,this.col - L)
-      let sData = getData(space)
-      if (space == null || sData == null) break
-      if (sData.owner == null) {
-        moves.push(space)
-      } else {
-        if (sData.ownerData.side === this.side) break
-        if (sData.ownerData.side !== this.side) {
-          moves.push(space)
-          break
-        }
-      }
-    }
-    for (let R = 1; R <= 8; R++) {
-      let space = getSpace(this.row,this.col + R)
-      let sData = getData(space)
-      if (space == null || sData == null) break
-      if (sData.owner == null) {
-        moves.push(space)
-      } else {
-        if (sData.ownerData.side === this.side) break
-        if (sData.ownerData.side !== this.side) {
-          moves.push(space)
-          break
-        }
-      }
-    }
 
-    //inrook for king
-
-    resetActive()
-    moves.forEach(m => {
-      m.classList.add('active')
-    })
-    return moves
-  }
-
-  commands(){//return array of what to add/remove on board
-    const tasks = []
-
-    return tasks
-  }
-
-  execute(command){
-    return
-  }
 }
 
 
@@ -293,32 +212,35 @@ class AIPlayer {
   }
 
   selectPiece(){
-    const pcs = pieces.filter(p => p.side === 'black')
-    if (pcs.length === 0) {
-      return
-    } else {
-      let length = pcs.length
-      this.piece = pcs[this.randomPick(length)]
+    let pcs = pieces.filter(p => p.side === 'black')
+    let limit = pcs.length
+    for (let i = 0; i < limit; i++){
+      if (pcs == null || pcs.length == 0) return
+      let testpiece = pcs[this.randomPick(pcs.length)]
+      let cmdLength = testpiece.commands().length
+      if (cmdLength > 0) {
+        this.piece = testpiece
+        return this.piece
+      } else {
+        pcs = pcs.filter(p => p !== testpiece)
+      }
     }
   }
 
-  selectCommand(){
-    if (this.piece.commands().length === 0) {
-      pieces = pieces.filter(p => p !== this.piece)
-      this.auto() 
-      return
-    }
-    this.piece.execute(this.randomPick(this.piece.commands().length))
+  movePiece(){
+    if (this.piece == null) return
+    const taskList = this.piece.commands()
+    const task = taskList[this.randomPick(taskList.length)]
+    task.command()
+    resetActive()
+    nextTurn()
   }
 
   auto(){
-    const pcs = pieces.filter(p => p.side === 'black')
-    if (pcs.length === 0){
-      return
+    if (this.selectPiece()){
+      this.movePiece()
     } else {
-      pcs.length > 1 ? this.selectPiece() : this.piece = pcs[0]
-      if (this.piece.commands().length === 0 && pcs.length === 1) return
-      this.selectCommand()
+      return
     }
   }
 }
@@ -341,52 +263,54 @@ const p5w = new Pawn(7,5,'white')
 const p6w = new Pawn(7,6,'white')
 const p7w = new Pawn(7,7,'white')
 const p8w = new Pawn(7,8,'white')
-const r1w = new Rook(8,1,'white')
 
+/*const r1w = new Rook(8,1,'white')*/
+
+let targets = null
 document.body.addEventListener('click', e => {
-  if (turn === 'black') return
-
-  const space = e.target.closest('.space')
-  if (space == null) return
-  const data = getData(space)
-  const owner = data.owner
-  const piece = getPiece(owner)
-
-  const movesArr = []
-  if (piece != null && piece.side === 'white'){
-    selectedPiece = piece
-    selectedPiece.commands()
-    highlightSelected()
-  } 
+  if (turn === 'black') {
+    return
+  } else {
+    const space = e.target.closest('.space')
+    if (space == null) return
   
-  if (space.classList.contains('active')) {
-    selectedPiece.getMoves().forEach(m => {
-      movesArr.push(m.move.space)
-    })
-    let index = movesArr.indexOf(space)
-    selectedPiece.execute(index)
-  }
-
+    const cell = getData(space)
+    if (cell){
+      if (cell.space.firstChild != null && cell.data.side === 'white'){
+        selectedPiece = cell
+        targets = cell.data.commands()
+        highlightSelected()
+      } else {
+        const target = targets.find(t => t.trigger === cell.space)
+        if (target == null) return
+        target.command()
+        resetActive()
+        nextTurn()
+      }
+    }
+  } 
 })
 
 function highlightSelected(){
-  const space = selectedPiece.getLocation()
+  const space = selectedPiece.data.getLocation()
   space.classList.add('selected')
 }
 
 function getData(space){
   if (space == null) return null
-  const data = {}
-  data.space = space
-  data.owner = space.firstChild
-  data.ownerData = this.getPiece(space.firstChild)
-  data.row = parseInt(space.dataset.row)
-  data.col = parseInt(space.dataset.col)
-  return data
+  const info = {
+    space: space,
+    piece: space.firstChild,
+    data: getPiece(space.firstChild),
+    row: parseInt(space.dataset.row),
+    col: parseInt(space.dataset.col),
+  }
+
+  return info
 }
 
 function getPiece(piece){
-  if (piece == null) return null
+  if (piece == null) return 
   return pieces.find(p => p.piece === piece)
 }
 
@@ -394,4 +318,9 @@ function nextTurn(){
   turnCount++
   turn = turnCount % 2 === 0 ? 'black' : 'white'
   if (turn === 'black') bob.auto()
+}
+
+function remove(piece) {
+  if (piece == null) return
+  pieces = pieces.filter(p => p !== piece)
 }
