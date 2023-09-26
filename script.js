@@ -277,12 +277,71 @@ class Rook extends Piece {
       validCommands.push(comm)
     })
 
+    resetActive()
     validCommands.forEach(c => {c.trigger.classList.add('active')})
     return validCommands
   }
 }
 
+class Knight extends Piece {
+  constructor(row,col,side) {
+    super(row,col,side)
+    this.kind = 'knight'
+    this.piece.classList.add(this.kind)
+  }
 
+  getAreas(){
+    this.getLocation()
+    const areas = []
+    let temp = [
+      getSpace(this.row - 2,this.col - 1),
+      getSpace(this.row - 2,this.col + 1),
+      getSpace(this.row - 1,this.col + 2),
+      getSpace(this.row + 1,this.col + 2),
+      getSpace(this.row + 2,this.col - 1),
+      getSpace(this.row + 2,this.col + 1),
+      getSpace(this.row - 1,this.col - 2),
+      getSpace(this.row + 1,this.col - 2),
+    ]
+    
+    for (let k = 0; k < temp.length; k++){
+      const info = getData(temp[k])
+      if (temp[k] == null) continue
+      if (info != null && info.piece == null) areas.push(temp[k])
+      if (info != null && info.data != null && info.piece != null && info.data.side != this.side) areas.push(temp[k])
+    }
+
+    return areas
+  }
+
+  commands(){
+    const validCommands = []
+    const triggers = this.getAreas()
+    const go = target => {
+      this.moved = true
+      this.moveTo(target)
+    } 
+
+    triggers.forEach(t => {
+      const c = {
+        trigger: t,
+        command(){
+          const enemy = getData(t)
+          if (enemy.piece != null) {
+            t.removeChild(enemy.piece)
+            remove(enemy.data)
+          }
+          go(t)
+        }
+      }
+      validCommands.push(c)
+    })
+
+    resetActive()
+    validCommands.forEach(c => {c.trigger.classList.add('active')})
+    return validCommands
+  }
+}
 
 
 class AIPlayer {
@@ -335,6 +394,8 @@ const p7b = new Pawn(2,7,'black')
 const p8b = new Pawn(2,8,'black')
 const r1b = new Rook(1,1,'black')
 const r2b = new Rook(1,8,'black')
+const k1b = new Knight(1,2,'black')
+const k2b = new Knight(1,7,'black')
 
 const p1w = new Pawn(7,1,'white')
 const p2w = new Pawn(7,2,'white')
@@ -346,6 +407,9 @@ const p7w = new Pawn(7,7,'white')
 const p8w = new Pawn(7,8,'white')
 const r1w = new Rook(8,1,'white')
 const r2w = new Rook(8,8,'white')
+const k1w = new Knight(8,2,'white')
+const k2w = new Knight(8,7,'white')
+
 
 let targets = null
 document.body.addEventListener('click', e => {
@@ -365,7 +429,6 @@ document.body.addEventListener('click', e => {
         const target = targets.find(t => t.trigger === cell.space)
         if (target == null) return
         target.command()
-        resetActive()
         nextTurn()
       }
     }
