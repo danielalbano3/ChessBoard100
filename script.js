@@ -572,6 +572,33 @@ class Queen extends Piece {
   }
 }
 
+class King extends Piece{
+  constructor(row,col,side){
+    super(row,col,side)
+    this.kind = 'king'
+    this.piece.classList.add(this.kind)
+  }
+
+  getAreas(){
+    this.getLocation()
+    const areas = []
+
+    const nw = getSpace(this.row - 1,this.col - 1)
+    const n = getSpace(this.row - 1,this.col)
+    const ne = getSpace(this.row - 1,this.col + 1)
+    const w = getSpace(this.row,this.col - 1)
+    const e = getSpace(this.row,this.col + 1)
+    const sw = getSpace(this.row + 1,this.col - 1)
+    const s = getSpace(this.row + 1,this.col)
+    const se = getSpace(this.row + 1,this.col + 1)
+
+    const inrookL = getSpace(this.row,this.col - 2)
+    const inrookR = getSpace(this.row,this.col + 2)
+
+    return areas
+  }
+}
+
 class AIPlayer {
   randomPick(max){
     return Math.floor(Math.random() * max)
