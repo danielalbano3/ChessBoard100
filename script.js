@@ -203,7 +203,7 @@ class Rook extends Piece {
   getAreas(){
     this.getLocation()
     const areas = []
-    for (let n = 1; n < 8; n++){
+    for (let n = 1; n <= 8; n++){
       const cell = getSpace(this.row - n,this.col)
       if (cell == null) break
       const c = getData(cell)
@@ -215,7 +215,7 @@ class Rook extends Piece {
       }
     }
 
-    for (let e = 1; e < 8; e++){
+    for (let e = 1; e <= 8; e++){
       const cell = getSpace(this.row,this.col + e)
       if (cell == null) break
       const c = getData(cell)
@@ -227,7 +227,7 @@ class Rook extends Piece {
       }
     }
 
-    for (let s = 1; s < 8; s++){
+    for (let s = 1; s <= 8; s++){
       const cell = getSpace(this.row + s,this.col)
       if (cell == null) break
       const c = getData(cell)
@@ -239,7 +239,7 @@ class Rook extends Piece {
       }
     }
 
-    for (let w = 1; w < 8; w++){
+    for (let w = 1; w <= 8; w++){
       const cell = getSpace(this.row,this.col - w)
       if (cell == null) break
       const c = getData(cell)
@@ -354,7 +354,7 @@ class Bishop extends Piece {
     this.getLocation()
     const areas = []
 
-    for (let ne = 1; ne < 8; ne++){
+    for (let ne = 1; ne <= 8; ne++){
       const cell = getSpace(this.row - ne,this.col + ne)
       if (cell == null) break
       const c = getData(cell)
@@ -366,7 +366,7 @@ class Bishop extends Piece {
       }
     }
 
-    for (let se = 1; se < 8; se++){
+    for (let se = 1; se <= 8; se++){
       const cell = getSpace(this.row + se,this.col + se)
       if (cell == null) break
       const c = getData(cell)
@@ -378,7 +378,7 @@ class Bishop extends Piece {
       }
     }
 
-    for (let sw = 1; sw < 8; sw++){
+    for (let sw = 1; sw <= 8; sw++){
       const cell = getSpace(this.row + sw,this.col - sw)
       if (cell == null) break
       const c = getData(cell)
@@ -390,7 +390,7 @@ class Bishop extends Piece {
       }
     }
 
-    for (let nw = 1; nw < 8; nw++){
+    for (let nw = 1; nw <= 8; nw++){
       const cell = getSpace(this.row - nw,this.col - nw)
       if (cell == null) break
       const c = getData(cell)
@@ -444,7 +444,7 @@ class Queen extends Piece {
     this.getLocation()
     const areas = []
 
-    for (let ne = 1; ne < 8; ne++){
+    for (let ne = 1; ne <= 8; ne++){
       const cell = getSpace(this.row - ne,this.col + ne)
       if (cell == null) break
       const c = getData(cell)
@@ -455,8 +455,7 @@ class Queen extends Piece {
         break
       }
     }
-
-    for (let se = 1; se < 8; se++){
+    for (let se = 1; se <= 8; se++){
       const cell = getSpace(this.row + se,this.col + se)
       if (cell == null) break
       const c = getData(cell)
@@ -467,8 +466,7 @@ class Queen extends Piece {
         break
       }
     }
-
-    for (let sw = 1; sw < 8; sw++){
+    for (let sw = 1; sw <= 8; sw++){
       const cell = getSpace(this.row + sw,this.col - sw)
       if (cell == null) break
       const c = getData(cell)
@@ -479,8 +477,7 @@ class Queen extends Piece {
         break
       }
     }
-
-    for (let nw = 1; nw < 8; nw++){
+    for (let nw = 1; nw <= 8; nw++){
       const cell = getSpace(this.row - nw,this.col - nw)
       if (cell == null) break
       const c = getData(cell)
@@ -491,8 +488,7 @@ class Queen extends Piece {
         break
       }
     }
-
-    for (let n = 1; n < 8; n++){
+    for (let n = 1; n <= 8; n++){
       const cell = getSpace(this.row - n,this.col)
       if (cell == null) break
       const c = getData(cell)
@@ -503,8 +499,7 @@ class Queen extends Piece {
         break
       }
     }
-
-    for (let e = 1; e < 8; e++){
+    for (let e = 1; e <= 8; e++){
       const cell = getSpace(this.row,this.col + e)
       if (cell == null) break
       const c = getData(cell)
@@ -515,8 +510,7 @@ class Queen extends Piece {
         break
       }
     }
-
-    for (let s = 1; s < 8; s++){
+    for (let s = 1; s <= 8; s++){
       const cell = getSpace(this.row + s,this.col)
       if (cell == null) break
       const c = getData(cell)
@@ -527,8 +521,7 @@ class Queen extends Piece {
         break
       }
     }
-
-    for (let w = 1; w < 8; w++){
+    for (let w = 1; w <= 8; w++){
       const cell = getSpace(this.row,this.col - w)
       if (cell == null) break
       const c = getData(cell)
@@ -577,27 +570,225 @@ class King extends Piece{
     super(row,col,side)
     this.kind = 'king'
     this.piece.classList.add(this.kind)
+    this.isChecked = false
   }
 
   getAreas(){
     this.getLocation()
     const areas = []
-
-    const nw = getSpace(this.row - 1,this.col - 1)
-    const n = getSpace(this.row - 1,this.col)
-    const ne = getSpace(this.row - 1,this.col + 1)
-    const w = getSpace(this.row,this.col - 1)
-    const e = getSpace(this.row,this.col + 1)
-    const sw = getSpace(this.row + 1,this.col - 1)
-    const s = getSpace(this.row + 1,this.col)
-    const se = getSpace(this.row + 1,this.col + 1)
-
-    const inrookL = getSpace(this.row,this.col - 2)
-    const inrookR = getSpace(this.row,this.col + 2)
-
+    let temp = [
+      getSpace(this.row - 1,this.col - 1),
+      getSpace(this.row - 1,this.col),
+      getSpace(this.row - 1,this.col + 1),
+      getSpace(this.row,this.col - 1),
+      getSpace(this.row,this.col + 1),
+      getSpace(this.row + 1,this.col - 1),
+      getSpace(this.row + 1,this.col),
+      getSpace(this.row + 1,this.col + 1)
+    ]
+    temp.forEach(cell => {
+      if (cell == null) return
+      const c = getData(cell)
+      if (c.piece == null) areas.push(cell)
+      if (c.piece != null && c.data.side == this.side) return
+      if (c.piece != null && c.data.side != this.side) areas.push(cell)
+    })
+      
     return areas
   }
+
+  onCheck(space){
+    let check = false
+    const location = getData(space)
+    const row = location.row
+    const col = location.col
+
+    //knight
+    let knightSpaces = [
+      getSpace(row - 2,col - 1),
+      getSpace(row - 2,col + 1),
+      getSpace(row - 1,col + 2),
+      getSpace(row + 1,col + 2),
+      getSpace(row + 2,col - 1),
+      getSpace(row + 2,col + 1),
+      getSpace(row - 1,col - 2),
+      getSpace(row + 1,col - 2)
+    ]
+
+    knightSpaces.forEach(cell => {
+      if (cell == null) return
+      const c = getData(cell)
+      if (c.piece != null && 
+          c.data.side != this.side && 
+          c.data.kind === 'knight') check = true
+    })
+
+    //bishop
+    for (let ne = 1; ne <= 8; ne++){
+      const cell = getSpace(row - ne,col + ne)
+      if (cell == null) break
+      const c = getData(cell)
+      if (c.piece != null && c.data.side == this.side) break
+      if (c.piece != null && c.data.side != this.side && c.data.kind === 'bishop' || 'queen') {
+        check = true
+        break
+      }
+    }
+    for (let se = 1; se <= 8; se++){
+      const cell = getSpace(row + se,col + se)
+      if (cell == null) break
+      const c = getData(cell)
+      if (c.piece != null && c.data.side == this.side) break
+      if (c.piece != null && c.data.side != this.side && c.data.kind === 'bishop' || 'queen') {
+        check = true
+        break
+      }
+    }
+    for (let sw = 1; sw <= 8; sw++){
+      const cell = getSpace(row + sw,col - sw)
+      if (cell == null) break
+      const c = getData(cell)
+      if (c.piece != null && c.data.side == this.side) break
+      if (c.piece != null && c.data.side != this.side && c.data.kind === 'bishop' || 'queen') {
+        check = true
+        break
+      }
+    }
+    for (let nw = 1; nw <= 8; nw++){
+      const cell = getSpace(row - nw,col - nw)
+      if (cell == null) break
+      const c = getData(cell)
+      if (c.piece != null && c.data.side == this.side) break
+      if (c.piece != null && c.data.side != this.side && c.data.kind === 'bishop' || 'queen') {
+        check = true
+        break
+      }
+    }
+    for (let n = 1; n <= 8; n++){
+      const cell = getSpace(row - n,col)
+      if (cell == null) break
+      const c = getData(cell)
+      if (c.piece != null && c.data.side == this.side) break
+      if (c.piece != null && c.data.side != this.side && c.data.kind === 'rook' || 'queen') {
+        check = true
+        break
+      }
+    }
+    for (let e = 1; e <= 8; e++){
+      const cell = getSpace(row,col + e)
+      if (cell == null) break
+      const c = getData(cell)
+      if (c.piece != null && c.data.side == this.side) break
+      if (c.piece != null && c.data.side != this.side && c.data.kind === 'rook' || 'queen') {
+        check = true
+        break
+      }
+    }
+    for (let s = 1; s <= 8; s++){
+      const cell = getSpace(row + s,col)
+      if (cell == null) break
+      const c = getData(cell)
+      if (c.piece != null && c.data.side == this.side) break
+      if (c.piece != null && c.data.side != this.side && c.data.kind === 'rook' || 'queen') {
+        check = true
+        break
+      }
+    }
+    for (let w = 1; w <= 8; w++){
+      const cell = getSpace(row,col - w)
+      if (cell == null) break
+      const c = getData(cell)
+      if (c.piece != null && c.data.side == this.side) break
+      if (c.piece != null && c.data.side != this.side && c.data.kind === 'rook' || 'queen') {
+        check = true
+        break
+      }
+    }
+    
+    //pawn
+    let pawnDirection = this.side === 'white' ? -1 : 1
+
+    const pawnSpaces = [
+      getSpace(row + pawnDirection,col - 1),
+      getSpace(row + pawnDirection,col + 1)
+    ]
+   
+    pawnSpaces.forEach(p => {
+      if (p == null) return
+      const ps = getData(p)
+      if (ps.piece != null && ps.data.side != this.side && ps.data.kind === 'pawn') check = true
+    })
+
+    return check
+  }
+
+  commands(){
+    const triggers = this.getAreas()
+    const validCommands = []
+    const go = target => {
+      this.moved = true
+      this.moveTo(target)
+    } 
+
+    triggers.forEach(t => {
+      const enemy = getData(t)
+      const comm = {
+        trigger: t,
+        command(){
+          if (enemy.piece != null) {
+            t.removeChild(enemy.piece)
+            remove(enemy.data)
+          }
+          go(t)
+        }
+      }
+      validCommands.push(comm)
+    })
+
+    const row = this.side === 'white' ? 8 : 1
+    const inkingL = getSpace(row,3)
+    const inrookL = getSpace(row,4)
+    const knightL = getSpace(row,2)
+    
+    const inkingR = getSpace(row,7)
+    const inrookR = getSpace(row,6)
+
+    const rookL = this.side === 'white' ? r1w : r1b
+    const rookR = this.side === 'white' ? r2w : r2b
+
+    const castlingL = {
+      trigger: inkingL,
+      command(){
+        inrookL.appendChild(rookL.piece)
+        go(inkingL)
+      }
+    }
+    if (rookL.moved === false && 
+        this.moved === false && 
+        getData(inkingL).piece == null &&
+        getData(inrookL).piece == null &&
+        getData(knightL).piece == null) validCommands.push(castlingL)
+
+    const castlingR = {
+      trigger: inkingR,
+      command(){
+        inrookR.appendChild(rookR.piece)
+        go(inkingR)
+      }
+    }
+    if (rookR.moved === false && 
+      this.moved === false && 
+      getData(inkingR).piece == null &&
+      getData(inrookR).piece == null) validCommands.push(castlingR)
+
+    resetActive()
+    this.isChecked = this.onCheck(getSpace(this.row,this.col))
+    validCommands.forEach(c => {c.trigger.classList.add('active')})
+    return validCommands
+  }
 }
+
+
 
 class AIPlayer {
   randomPick(max){
@@ -655,6 +846,7 @@ const b1b = new Bishop(1,3,'black')
 const b2b = new Bishop(1,6,'black')
 const qb = new Queen(1,4,'black')
 
+const kw = new King(8,5,'white')
 const qw = new Queen(8,4,'white')
 const p1w = new Pawn(7,1,'white')
 const p2w = new Pawn(7,2,'white')
@@ -670,6 +862,7 @@ const k1w = new Knight(8,2,'white')
 const k2w = new Knight(8,7,'white')
 const b1w = new Bishop(8,3,'white')
 const b2w = new Bishop(8,6,'white')
+
 
 
 let targets = null
