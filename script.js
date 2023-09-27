@@ -1,5 +1,6 @@
 const board = document.querySelector('#board')
 const spaces = []
+let aiDelay
 
 let turnCount = 1
 let turn = 'white' 
@@ -188,7 +189,7 @@ class Pawn extends Piece {
         turnCount - rightData.data.jumptime === 1) validCommands.push(goEnpassantRight)
     
     resetActive()
-    validCommands.forEach(c => {c.trigger.classList.add('active')})
+    if (turn === 'white') validCommands.forEach(c => {c.trigger.classList.add('active')})
     return validCommands
   }
 }
@@ -278,7 +279,7 @@ class Rook extends Piece {
     })
 
     resetActive()
-    validCommands.forEach(c => {c.trigger.classList.add('active')})
+    if (turn === 'white') validCommands.forEach(c => {c.trigger.classList.add('active')})
     return validCommands
   }
 }
@@ -338,7 +339,7 @@ class Knight extends Piece {
     })
 
     resetActive()
-    validCommands.forEach(c => {c.trigger.classList.add('active')})
+    if (turn === 'white') validCommands.forEach(c => {c.trigger.classList.add('active')})
     return validCommands
   }
 }
@@ -428,7 +429,7 @@ class Bishop extends Piece {
     })
 
     resetActive()
-    validCommands.forEach(c => {c.trigger.classList.add('active')})
+    if (turn === 'white') validCommands.forEach(c => {c.trigger.classList.add('active')})
     return validCommands
   }
 }
@@ -560,7 +561,7 @@ class Queen extends Piece {
     })
 
     resetActive()
-    validCommands.forEach(c => {c.trigger.classList.add('active')})
+    if (turn === 'white') validCommands.forEach(c => {c.trigger.classList.add('active')})
     return validCommands
   }
 }
@@ -797,7 +798,7 @@ class King extends Piece{
       getData(inrookR).piece == null) validCommands.push(castlingR)
 
     resetActive()
-    validCommands.forEach(c => {c.trigger.classList.add('active')})
+    if (turn === 'white') validCommands.forEach(c => {c.trigger.classList.add('active')})
     return validCommands
   }
 }
@@ -835,8 +836,11 @@ class AIPlayer {
   }
 
   auto(){
+    aiDelay = Math.floor(Math.random() * 1000) + 500
     if (this.selectPiece()){
-      this.movePiece()
+      setTimeout(() => {
+        this.movePiece()
+      }, aiDelay)
     } else {
       return
     }
