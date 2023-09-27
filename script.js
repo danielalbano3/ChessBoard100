@@ -629,9 +629,11 @@ class King extends Piece{
       if (cell == null) break
       const c = getData(cell)
       if (c.piece != null && c.data.side == this.side) break
-      if (c.piece != null && c.data.side != this.side && c.data.kind === 'bishop' || 'queen') {
-        check = true
-        break
+      if (c.piece != null && c.data.side != this.side){
+        if (c.data.kind === 'bishop' || c.data.kind === 'queen') {
+          check = true
+          break
+        } 
       }
     }
     for (let se = 1; se <= 8; se++){
@@ -639,9 +641,11 @@ class King extends Piece{
       if (cell == null) break
       const c = getData(cell)
       if (c.piece != null && c.data.side == this.side) break
-      if (c.piece != null && c.data.side != this.side && c.data.kind === 'bishop' || 'queen') {
-        check = true
-        break
+      if (c.piece != null && c.data.side != this.side){
+        if (c.data.kind === 'bishop' || c.data.kind === 'queen') {
+          check = true
+          break
+        } 
       }
     }
     for (let sw = 1; sw <= 8; sw++){
@@ -649,9 +653,11 @@ class King extends Piece{
       if (cell == null) break
       const c = getData(cell)
       if (c.piece != null && c.data.side == this.side) break
-      if (c.piece != null && c.data.side != this.side && c.data.kind === 'bishop' || 'queen') {
-        check = true
-        break
+      if (c.piece != null && c.data.side != this.side){
+        if (c.data.kind === 'bishop' || c.data.kind === 'queen') {
+          check = true
+          break
+        } 
       }
     }
     for (let nw = 1; nw <= 8; nw++){
@@ -659,9 +665,11 @@ class King extends Piece{
       if (cell == null) break
       const c = getData(cell)
       if (c.piece != null && c.data.side == this.side) break
-      if (c.piece != null && c.data.side != this.side && c.data.kind === 'bishop' || 'queen') {
-        check = true
-        break
+      if (c.piece != null && c.data.side != this.side){
+        if (c.data.kind === 'bishop' || c.data.kind === 'queen') {
+          check = true
+          break
+        } 
       }
     }
     for (let n = 1; n <= 8; n++){
@@ -669,9 +677,11 @@ class King extends Piece{
       if (cell == null) break
       const c = getData(cell)
       if (c.piece != null && c.data.side == this.side) break
-      if (c.piece != null && c.data.side != this.side && c.data.kind === 'rook' || 'queen') {
-        check = true
-        break
+      if (c.piece != null && c.data.side != this.side){
+        if (c.data.kind === 'rook' || c.data.kind === 'queen') {
+          check = true
+          break
+        } 
       }
     }
     for (let e = 1; e <= 8; e++){
@@ -679,9 +689,11 @@ class King extends Piece{
       if (cell == null) break
       const c = getData(cell)
       if (c.piece != null && c.data.side == this.side) break
-      if (c.piece != null && c.data.side != this.side && c.data.kind === 'rook' || 'queen') {
-        check = true
-        break
+      if (c.piece != null && c.data.side != this.side){
+        if (c.data.kind === 'rook' || c.data.kind === 'queen') {
+          check = true
+          break
+        } 
       }
     }
     for (let s = 1; s <= 8; s++){
@@ -689,9 +701,11 @@ class King extends Piece{
       if (cell == null) break
       const c = getData(cell)
       if (c.piece != null && c.data.side == this.side) break
-      if (c.piece != null && c.data.side != this.side && c.data.kind === 'rook' || 'queen') {
-        check = true
-        break
+      if (c.piece != null && c.data.side != this.side){
+        if (c.data.kind === 'rook' || c.data.kind === 'queen') {
+          check = true
+          break
+        } 
       }
     }
     for (let w = 1; w <= 8; w++){
@@ -699,25 +713,26 @@ class King extends Piece{
       if (cell == null) break
       const c = getData(cell)
       if (c.piece != null && c.data.side == this.side) break
-      if (c.piece != null && c.data.side != this.side && c.data.kind === 'rook' || 'queen') {
-        check = true
-        break
+      if (c.piece != null && c.data.side != this.side){
+        if (c.data.kind === 'rook' || c.data.kind === 'queen') {
+          check = true
+          break
+        } 
       }
     }
     
     //pawn
     let pawnDirection = this.side === 'white' ? -1 : 1
-
     const pawnSpaces = [
       getSpace(row + pawnDirection,col - 1),
       getSpace(row + pawnDirection,col + 1)
     ]
-   
     pawnSpaces.forEach(p => {
       if (p == null) return
       const ps = getData(p)
       if (ps.piece != null && ps.data.side != this.side && ps.data.kind === 'pawn') check = true
     })
+
 
     return check
   }
@@ -782,7 +797,6 @@ class King extends Piece{
       getData(inrookR).piece == null) validCommands.push(castlingR)
 
     resetActive()
-    this.isChecked = this.onCheck(getSpace(this.row,this.col))
     validCommands.forEach(c => {c.trigger.classList.add('active')})
     return validCommands
   }
@@ -845,6 +859,7 @@ const k2b = new Knight(1,7,'black')
 const b1b = new Bishop(1,3,'black')
 const b2b = new Bishop(1,6,'black')
 const qb = new Queen(1,4,'black')
+const kb = new King(1,5,'black')
 
 const kw = new King(8,5,'white')
 const qw = new Queen(8,4,'white')
@@ -913,6 +928,8 @@ function getPiece(piece){
 }
 
 function nextTurn(){
+  kw.isChecked = kw.onCheck(getSpace(kw.row,kw.col))
+  kb.isChecked = kb.onCheck(getSpace(kb.row,kb.col))
   turnCount++
   turn = turnCount % 2 === 0 ? 'black' : 'white'
   if (turn === 'black') bob.auto()
