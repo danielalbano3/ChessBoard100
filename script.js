@@ -897,7 +897,6 @@ document.body.addEventListener('click', e => {
   if (isPawnPromo){
     return
   } else {
-    console.log('not working')
     if (turn === 'black') {
       return
     } else {
@@ -954,10 +953,9 @@ function nextTurn(){
 function checkPawnPromo(){
   pawnForPromotion = null
   isPawnPromo = true
-  const row = this.turn === 'white' ? 8 : 1
+  const row = turn === 'white' ? 1 : 8
   for (let i = 1; i <= 8; i++){
     const info = getData(getSpace(row, i))
-    console.log(row)
     if (info != null && info.data != null && info.data.kind === 'pawn') {
       pawnForPromotion = info.data
       break
