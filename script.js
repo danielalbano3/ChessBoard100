@@ -970,6 +970,7 @@ function inspectKings(){
   } else {
     kb.piece.classList.remove('checked')
   }
+  checkAlert()
 
   console.log(say)
 }
