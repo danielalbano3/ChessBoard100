@@ -149,3 +149,34 @@ body {
   cursor: pointer;
 }
 
+.checked {
+  background: hsl(300, 60%, 25%)
+}
+
+.checkalert {
+  border:1px solid white;
+  text-align: center;
+  padding-top: 1%;
+  aspect-ratio: 5/1;
+  height: 3rem;
+  font-family:Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  font-size: 1.2rem;
+  position: absolute;
+  visibility: hidden;
+}
+
+.wking {
+  background: linear-gradient(to top, cyan, purple);
+  bottom:15%;
+  color:white;
+}
+
+.bking {
+  background: linear-gradient(to bottom, cyan, purple);
+  top:15%;
+  color:black;
+}
+
+.checknotice {
+  visibility: visible;
+}

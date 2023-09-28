@@ -8,6 +8,20 @@ const pRook = document.querySelector('.r-choice')
 const pBishop = document.querySelector('.b-choice')
 const pKnight = document.querySelector('.k-choice')
 
+const wCheckalert = document.querySelector('.wking')
+const bCheckalert = document.querySelector('.bking')
+
+function checkAlert(){
+  const kings = [kw,kb]
+  kings.forEach(k => {
+    if (k.isChecked){
+      k.side === 'white' ? wCheckalert.classList.add('checknotice') : bCheckalert.classList.add('checknotice')
+    } else {
+      k.side === 'white' ? wCheckalert.classList.remove('checknotice') : bCheckalert.classList.remove('checknotice')
+    }
+  })
+}
+
 const spaces = []
 
 let aiDelay
@@ -942,9 +956,26 @@ function getPiece(piece){
   return pieces.find(p => p.piece === piece)
 }
 
-function nextTurn(){
+function inspectKings(){
   kw.isChecked = kw.onCheck(getSpace(kw.row,kw.col))
   kb.isChecked = kb.onCheck(getSpace(kb.row,kb.col))
+  const say = `Checked kw: ${kw.isChecked}, kb: ${kb.isChecked}`
+  if (kw.isChecked) {
+    kw.piece.classList.add('checked')
+  } else {
+    kw.piece.classList.remove('checked')
+  }
+  if (kb.isChecked) {
+    kb.piece.classList.add('checked')
+  } else {
+    kb.piece.classList.remove('checked')
+  }
+
+  console.log(say)
+}
+
+function nextTurn(){
+  inspectKings()
   turnCount++
   turn = turnCount % 2 === 0 ? 'black' : 'white'
   if (turn === 'black') bob.auto()
