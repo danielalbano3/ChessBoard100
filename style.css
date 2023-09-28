@@ -1,10 +1,10 @@
 *,*::before,*::after {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  margin: 0;
-  padding: 0;
   height: 100vh;
   background: black;
   display:flex;
@@ -79,3 +79,73 @@ body {
 .selected {
   border: 0.2em solid white;
 }
+
+#pawn-promo{
+  aspect-ratio: 2/1;
+  min-height:20vh;
+  border:0.2rem solid white;
+  position:absolute;
+  display:grid;
+  grid-template-rows: 1fr 0.5fr 3fr;
+  font-weight: bolder;
+  color:wheat;
+}
+
+.title,.subtitle {
+  border:0.1rem solid white;
+  text-align: center;
+  font-size:1.2rem;
+}
+
+.title {
+  padding-top: 0.4rem;
+}
+
+.subtitle {
+  font-size: 1rem;
+}
+
+#pawn-promo {
+  background: hsla(0, 0%, 50%, 0.7);
+}
+
+#overlay {
+  position:absolute;
+  height:100%;
+  width:100%;
+  background: hsla(51, 100%, 40%, 0.3);
+}
+
+.hide {
+  visibility: hidden;
+}
+
+.promo-selection {
+  border:0.1rem solid white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap:1rem;
+}
+
+.promo-choice {
+  aspect-ratio: 1/1;
+  width:4rem;
+  border: 0.1rem solid gold;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.promo-choice > div {
+  background: orange;
+  aspect-ratio: 1/1;
+  width:80%;
+}
+
+.promo-choice:hover{
+  transform: translateY(-0.4rem);
+  background-color: aqua;
+  cursor: pointer;
+}
+

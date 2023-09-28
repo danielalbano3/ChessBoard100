@@ -1,6 +1,18 @@
 const board = document.querySelector('#board')
+
+const overlay = document.querySelector('#overlay')
+const pawnPromo = document.querySelector('#pawn-promo')
+
+const pQueen = document.querySelector('.q-choice')
+const pRook = document.querySelector('.r-choice')
+const pBishop = document.querySelector('.b-choice')
+const pKnight = document.querySelector('.k-choice')
+
 const spaces = []
+
 let aiDelay
+let pawnForPromotion = null
+let isPawnPromo = false
 
 let turnCount = 1
 let turn = 'white' 
@@ -803,8 +815,6 @@ class King extends Piece{
   }
 }
 
-
-
 class AIPlayer {
   randomPick(max){
     return Math.floor(Math.random() * max)
@@ -832,7 +842,7 @@ class AIPlayer {
     const task = taskList[this.randomPick(taskList.length)]
     task.command()
     resetActive()
-    nextTurn()
+    checkPawnPromo()
   }
 
   auto(){
@@ -882,30 +892,33 @@ const k2w = new Knight(8,7,'white')
 const b1w = new Bishop(8,3,'white')
 const b2w = new Bishop(8,6,'white')
 
-
-
 let targets = null
 document.body.addEventListener('click', e => {
-  if (turn === 'black') {
+  if (isPawnPromo){
     return
   } else {
-    const space = e.target.closest('.space')
-    if (space == null) return
-  
-    const cell = getData(space)
-    if (cell){
-      if (cell.space.firstChild != null && cell.data.side === 'white'){
-        selectedPiece = cell
-        targets = cell.data.commands()
-        highlightSelected()
-      } else {
-        const target = targets.find(t => t.trigger === cell.space)
-        if (target == null) return
-        target.command()
-        nextTurn()
+    console.log('not working')
+    if (turn === 'black') {
+      return
+    } else {
+      const space = e.target.closest('.space')
+      if (space == null) return
+    
+      const cell = getData(space)
+      if (cell){
+        if (cell.space.firstChild != null && cell.data.side === 'white'){
+          selectedPiece = cell
+          targets = cell.data.commands()
+          highlightSelected()
+        } else {
+          const target = targets.find(t => t.trigger === cell.space)
+          if (target == null) return
+          target.command()
+          checkPawnPromo()
+        }
       }
-    }
-  } 
+    } 
+  }
 })
 
 function highlightSelected(){
@@ -922,7 +935,6 @@ function getData(space){
     row: parseInt(space.dataset.row),
     col: parseInt(space.dataset.col),
   }
-
   return info
 }
 
@@ -939,7 +951,81 @@ function nextTurn(){
   if (turn === 'black') bob.auto()
 }
 
+function checkPawnPromo(){
+  pawnForPromotion = null
+  isPawnPromo = true
+  const row = this.turn === 'white' ? 8 : 1
+  for (let i = 1; i <= 8; i++){
+    const info = getData(getSpace(row, i))
+    console.log(row)
+    if (info != null && info.data != null && info.data.kind === 'pawn') {
+      pawnForPromotion = info.data
+      break
+    } 
+  }
+
+  if (pawnForPromotion == null) {
+    isPawnPromo = false
+    nextTurn()
+  } else {
+    showPromo()
+  }
+}
+
 function remove(piece) {
   if (piece == null) return
   pieces = pieces.filter(p => p !== piece)
 }
+
+function hidePromo(){
+  overlay.classList.add('hide')  
+  pawnPromo.classList.add('hide') 
+}
+
+function showPromo(){
+  overlay.classList.remove('hide')  
+  pawnPromo.classList.remove('hide')
+  if (turn === 'black'){
+    const promos = ['queen','bishop','rook','knight']
+    const AIindex = Math.floor(Math.random() * promos.length)
+    promotePawn(promos[AIindex])
+  }
+}
+
+function promotePawn(rank){
+  const pRow = pawnForPromotion.row
+  const pCol = pawnForPromotion.col
+  const pSide = pawnForPromotion.side
+  const targetSpace = getSpace(pRow,pCol)
+  remove(pawnForPromotion)
+  targetSpace.removeChild(targetSpace.firstChild)
+
+  let x = null
+
+  switch(rank){
+    case 'queen':
+      x = new Queen(pRow,pCol,pSide)
+      break
+    case 'bishop':
+      x = new Bishop(pRow,pCol,pSide)
+      break
+    case 'rook':
+      x = new Rook(pRow,pCol,pSide)
+      break
+    case 'knight':
+      x = new Knight(pRow,pCol,pSide)
+      break
+    default:
+      return
+  }
+
+  pieces.push(x)
+  hidePromo()
+  isPawnPromo = false
+  nextTurn()
+}
+
+pQueen.addEventListener('click', () => {promotePawn('queen')})
+pBishop.addEventListener('click', () => {promotePawn('bishop')})
+pRook.addEventListener('click', () => {promotePawn('rook')})
+pKnight.addEventListener('click', () => {promotePawn('knight')})
